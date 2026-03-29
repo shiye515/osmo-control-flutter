@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.turbo/
+dist/
+*.lock
+!pnpm-lock.yaml
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+*.g.dart

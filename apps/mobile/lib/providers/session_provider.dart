@@ -1,0 +1,243 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
+
+import '../api/protocol_codec.dart';
+import '../config/app_constants.dart';
+import '../models/session_device_model.dart';
+import '../models/camera_status_model.dart';
+import '../models/scan_result_model.dart';
+import '../models/debug_log_model.dart';
+import 'ble_provider.dart';
+
+class SessionProvider extends ChangeNotifier {
+  static final _log = Logger('SessionProvider');
+
+  BleProvider? _bleProvider;
+
+  SessionDeviceModel? _connectedDevice;
+  CameraStatusModel _cameraStatus = const CameraStatusModel();
+  List<ScanResultModel> _scanResults = [];
+  final List<DebugLogEntry> _logs = [];
+  bool _isFakeMode = false;
+  String? _lastError;
+
+  SessionDeviceModel? get connectedDevice => _connectedDevice;
+  CameraStatusModel get cameraStatus => _cameraStatus;
+  List<ScanResultModel> get scanResults => _scanResults;
+  List<DebugLogEntry> get logs => List.unmodifiable(_logs);
+  bool get isFakeMode => _isFakeMode;
+  String? get lastError => _lastError;
+  bool get isConnected => _connectedDevice?.isConnected ?? false;
+  bool get isAuthenticated => _connectedDevice?.isAuthenticated ?? false;
+
+  StreamSubscription<List<int>>? _notifySubscription;
+
+  void updateBleProvider(BleProvider ble) {
+    _bleProvider = ble;
+    _scanResults = ble.scanResults;
+    notifyListeners();
+  }
+
+  Future<void> startScan() async {
+    await _bleProvider?.startScan();
+    _scanResults = _bleProvider?.scanResults ?? [];
+    notifyListeners();
+  }
+
+  Future<void> stopScan() async {
+    await _bleProvider?.stopScan();
+    notifyListeners();
+  }
+
+  Future<bool> connect(String deviceId, String deviceName) async {
+    _connectedDevice = SessionDeviceModel(
+      deviceId: deviceId,
+      deviceName: deviceName,
+      connectionState: DeviceConnectionState.connecting,
+    );
+    notifyListeners();
+
+    final success = await _bleProvider?.connect(deviceId) ?? false;
+    if (success) {
+      _connectedDevice = _connectedDevice!.copyWith(
+        connectionState: DeviceConnectionState.authenticated,
+      );
+      _addLog(LogDirection.system, 'Connected to $deviceName');
+      _subscribeNotifications();
+    } else {
+      _connectedDevice = null;
+      _lastError = 'Connection failed';
+      _addLog(LogDirection.system, 'Connection failed to $deviceName');
+    }
+    notifyListeners();
+    return success;
+  }
+
+  void _subscribeNotifications() {
+    _notifySubscription?.cancel();
+    _notifySubscription =
+        _bleProvider?.notifyStream?.listen(_handleNotification);
+  }
+
+  void _handleNotification(List<int> data) {
+    _addLog(LogDirection.received, 'RX: ${_hexStr(data)}', rawBytes: data);
+    _parseResponse(data);
+    notifyListeners();
+  }
+
+  void _parseResponse(List<int> data) {
+    final payload = ProtocolCodec.parseResponse(data);
+    if (payload == null) return;
+    // Update camera status from telemetry responses
+    if (data.length > 11) {
+      final cmdSet = data[10];
+      final cmdId = data[11];
+      if (cmdSet == 0x01 && cmdId == 0x4B) {
+        // Recording toggle response
+        _cameraStatus = _cameraStatus.copyWith(
+          isRecording: !_cameraStatus.isRecording,
+        );
+      }
+    }
+  }
+
+  Future<bool> sendRawCommand(List<int> bytes) async {
+    _addLog(LogDirection.sent, 'TX: ${_hexStr(bytes)}', rawBytes: bytes);
+    return await _bleProvider?.write(bytes) ?? false;
+  }
+
+  Future<void> toggleRecording() async {
+    if (!isConnected && !_isFakeMode) return;
+    if (_isFakeMode) {
+      _cameraStatus = _cameraStatus.copyWith(
+          isRecording: !_cameraStatus.isRecording);
+      _addLog(LogDirection.system, '[Fake] Toggle recording');
+      notifyListeners();
+      return;
+    }
+    final cmd = ProtocolCodec.buildToggleRecording();
+    await sendRawCommand(cmd);
+  }
+
+  Future<void> takeSnapshot() async {
+    if (!isConnected && !_isFakeMode) return;
+    if (_isFakeMode) {
+      _addLog(LogDirection.system, '[Fake] Take snapshot');
+      return;
+    }
+    final cmd = ProtocolCodec.buildTakeSnapshot();
+    await sendRawCommand(cmd);
+  }
+
+  Future<void> switchMode(int mode) async {
+    if (!isConnected && !_isFakeMode) return;
+    if (_isFakeMode) {
+      _cameraStatus = _cameraStatus.copyWith(currentMode: mode);
+      _addLog(LogDirection.system, '[Fake] Switch mode to $mode');
+      notifyListeners();
+      return;
+    }
+    final cmd = ProtocolCodec.buildSwitchMode(mode);
+    await sendRawCommand(cmd);
+  }
+
+  Future<void> sleep() async {
+    if (!isConnected && !_isFakeMode) return;
+    final cmd = ProtocolCodec.buildSleep();
+    if (_isFakeMode) {
+      _addLog(LogDirection.system, '[Fake] Sleep');
+      return;
+    }
+    await sendRawCommand(cmd);
+  }
+
+  Future<void> wake() async {
+    if (!isConnected && !_isFakeMode) return;
+    final cmd = ProtocolCodec.buildWake();
+    if (_isFakeMode) {
+      _addLog(LogDirection.system, '[Fake] Wake');
+      return;
+    }
+    await sendRawCommand(cmd);
+  }
+
+  Future<void> requestVersion() async {
+    if (!isConnected && !_isFakeMode) return;
+    if (_isFakeMode) {
+      _cameraStatus = _cameraStatus.copyWith(firmwareVersion: 'Fake v1.0.0');
+      notifyListeners();
+      return;
+    }
+    final cmd = ProtocolCodec.buildRequestVersion();
+    await sendRawCommand(cmd);
+  }
+
+  Future<void> pushGps(
+      double latitude, double longitude, double altitude) async {
+    if (!isConnected && !_isFakeMode) return;
+    if (_isFakeMode) {
+      _addLog(LogDirection.system,
+          '[Fake] GPS push: $latitude, $longitude, $altitude');
+      return;
+    }
+    final cmd = ProtocolCodec.buildPushGps(
+        latitude: latitude, longitude: longitude, altitude: altitude);
+    await sendRawCommand(cmd);
+  }
+
+  Future<void> disconnect() async {
+    await _bleProvider?.disconnect();
+    _connectedDevice = null;
+    _notifySubscription?.cancel();
+    _addLog(LogDirection.system, 'Disconnected');
+    notifyListeners();
+  }
+
+  void enableFakeMode(bool enabled) {
+    _isFakeMode = enabled;
+    if (enabled) {
+      _connectedDevice = const SessionDeviceModel(
+        deviceId: 'fake-device-001',
+        deviceName: 'Osmo Pocket (Fake)',
+        connectionState: DeviceConnectionState.authenticated,
+        firmwareVersion: 'Fake v1.0.0',
+        batteryLevel: 85,
+      );
+      _cameraStatus = const CameraStatusModel(
+        isRecording: false,
+        currentMode: 0,
+        gimbalPitch: -10.0,
+        gimbalRoll: 0.0,
+        gimbalYaw: 5.0,
+        batteryPercent: 85,
+      );
+      _addLog(LogDirection.system, 'Fake device mode enabled');
+    } else {
+      _connectedDevice = null;
+      _cameraStatus = const CameraStatusModel();
+      _addLog(LogDirection.system, 'Fake device mode disabled');
+    }
+    notifyListeners();
+  }
+
+  void clearLogs() {
+    _logs.clear();
+    notifyListeners();
+  }
+
+  void _addLog(LogDirection direction, String message,
+      {List<int>? rawBytes}) {
+    _logs.add(DebugLogEntry(
+      timestamp: DateTime.now(),
+      direction: direction,
+      message: message,
+      rawBytes: rawBytes,
+    ));
+    if (_logs.length > AppConstants.maxDebugLogEntries) _logs.removeAt(0);
+    _log.info(message);
+  }
+
+  String _hexStr(List<int> bytes) =>
+      bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ');
+}
