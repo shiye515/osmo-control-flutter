@@ -132,7 +132,7 @@ class _ConnectionCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   isConnected
-                      ? device!.deviceName
+                      ? device?.deviceName ?? 'Unknown'
                       : '未连接设备',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),

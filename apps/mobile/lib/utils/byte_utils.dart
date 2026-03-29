@@ -65,11 +65,12 @@ class ByteUtils {
     return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ');
   }
 
-  /// Parse hex string to bytes.
+  /// Parse hex string to bytes. Odd-length strings are left-padded with zero.
   static List<int> fromHex(String hex) {
-    final cleaned = hex.replaceAll(RegExp(r'[^0-9a-fA-F]'), '');
+    var cleaned = hex.replaceAll(RegExp(r'[^0-9a-fA-F]'), '');
+    if (cleaned.length.isOdd) cleaned = '0$cleaned';
     final result = <int>[];
-    for (int i = 0; i < cleaned.length - 1; i += 2) {
+    for (int i = 0; i < cleaned.length; i += 2) {
       result.add(int.parse(cleaned.substring(i, i + 2), radix: 16));
     }
     return result;

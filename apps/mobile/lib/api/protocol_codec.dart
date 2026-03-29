@@ -21,7 +21,7 @@ class ProtocolCodec {
   }) {
     final seq = _nextSeq();
     final payloadLength = payload.length;
-    final frameLength = 13 + payloadLength; // header(4) + snd/rcv(2) + seq(2) + cmdset/id(2) + payload + crc16(2) + crc32(1)
+    final frameLength = 14 + payloadLength; // SOF(1) + len(2) + hdr_crc8(1) + snd/rcv(2) + seq(2) + flags/enc(2) + cmdset/id(2) + payload + crc16(2)
 
     final frame = List<int>.filled(frameLength, 0);
     frame[0] = AppConstants.dumlHeaderByte; // SOF

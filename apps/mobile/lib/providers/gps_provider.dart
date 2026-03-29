@@ -46,10 +46,12 @@ class GpsProvider extends ChangeNotifier {
 
   void _startAutoPush() {
     _stopAutoPush();
-    final interval = Duration(
-        milliseconds: (_frequencyHz > 0 ? (1000 / _frequencyHz) : 1000)
-            .round());
-    _autoPushTimer = Timer.periodic(interval, (_) => _pushCurrentLocation());
+    // Clamp interval between 100 ms (10 Hz) and 60 000 ms (1/60 Hz).
+    final intervalMs = (_frequencyHz > 0 ? (1000 / _frequencyHz) : 1000)
+        .round()
+        .clamp(100, 60000);
+    _autoPushTimer = Timer.periodic(
+        Duration(milliseconds: intervalMs), (_) => _pushCurrentLocation());
   }
 
   void _stopAutoPush() {
