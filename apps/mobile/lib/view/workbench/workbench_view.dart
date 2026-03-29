@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:toastification/toastification.dart';
 
 import '../../config/app_theme.dart';
+import '../../models/camera_status_model.dart';
 import '../../models/session_device_model.dart';
 import '../../providers/session_provider.dart';
 import '../../utils/format_utils.dart';
@@ -217,7 +218,7 @@ class _RecordingCard extends StatelessWidget {
 
 class _DeviceInfoCard extends StatelessWidget {
   final SessionDeviceModel device;
-  final dynamic status;
+  final CameraStatusModel status;
   const _DeviceInfoCard({required this.device, required this.status});
 
   @override

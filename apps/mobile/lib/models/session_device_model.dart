@@ -1,4 +1,4 @@
-enum ConnectionState {
+enum DeviceConnectionState {
   disconnected,
   scanning,
   connecting,
@@ -10,7 +10,7 @@ enum ConnectionState {
 class SessionDeviceModel {
   final String deviceId;
   final String deviceName;
-  final ConnectionState connectionState;
+  final DeviceConnectionState connectionState;
   final String? firmwareVersion;
   final int? batteryLevel;
 
@@ -23,16 +23,16 @@ class SessionDeviceModel {
   });
 
   bool get isConnected =>
-      connectionState == ConnectionState.connected ||
-      connectionState == ConnectionState.authenticated;
+      connectionState == DeviceConnectionState.connected ||
+      connectionState == DeviceConnectionState.authenticated;
 
   bool get isAuthenticated =>
-      connectionState == ConnectionState.authenticated;
+      connectionState == DeviceConnectionState.authenticated;
 
   SessionDeviceModel copyWith({
     String? deviceId,
     String? deviceName,
-    ConnectionState? connectionState,
+    DeviceConnectionState? connectionState,
     String? firmwareVersion,
     int? batteryLevel,
   }) {

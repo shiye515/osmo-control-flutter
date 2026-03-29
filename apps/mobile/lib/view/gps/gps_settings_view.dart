@@ -85,10 +85,12 @@ class GpsSettingsView extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
-            onPressed: () {
-              // Manual GPS push with test coordinates
-              gps.pushGpsNow(39.9042, 116.4074, 45.0);
-            },
+            onPressed: gps.lastGpsPoint == null
+                ? null
+                : () {
+                    final p = gps.lastGpsPoint!;
+                    gps.pushGpsNow(p.latitude, p.longitude, p.altitude);
+                  },
             icon: const Icon(Icons.send),
             label: const Text('立即推送当前位置'),
           ),

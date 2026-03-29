@@ -28,4 +28,7 @@ class AppConstants {
   static const String prefKeyControllerId = 'controller_id';
   static const String prefKeyPairedDeviceId = 'paired_device_id';
   static const String prefKeyGpsFrequency = 'gps_frequency_hz';
+
+  // Session
+  static const int maxDebugLogEntries = 500;
 }

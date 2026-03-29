@@ -54,14 +54,14 @@ class SessionProvider extends ChangeNotifier {
     _connectedDevice = SessionDeviceModel(
       deviceId: deviceId,
       deviceName: deviceName,
-      connectionState: ConnectionState.connecting,
+      connectionState: DeviceConnectionState.connecting,
     );
     notifyListeners();
 
     final success = await _bleProvider?.connect(deviceId) ?? false;
     if (success) {
       _connectedDevice = _connectedDevice!.copyWith(
-        connectionState: ConnectionState.authenticated,
+        connectionState: DeviceConnectionState.authenticated,
       );
       _addLog(LogDirection.system, 'Connected to $deviceName');
       _subscribeNotifications();
@@ -200,7 +200,7 @@ class SessionProvider extends ChangeNotifier {
       _connectedDevice = const SessionDeviceModel(
         deviceId: 'fake-device-001',
         deviceName: 'Osmo Pocket (Fake)',
-        connectionState: ConnectionState.authenticated,
+        connectionState: DeviceConnectionState.authenticated,
         firmwareVersion: 'Fake v1.0.0',
         batteryLevel: 85,
       );
@@ -234,7 +234,7 @@ class SessionProvider extends ChangeNotifier {
       message: message,
       rawBytes: rawBytes,
     ));
-    if (_logs.length > 500) _logs.removeAt(0);
+    if (_logs.length > AppConstants.maxDebugLogEntries) _logs.removeAt(0);
     _log.info(message);
   }
 
