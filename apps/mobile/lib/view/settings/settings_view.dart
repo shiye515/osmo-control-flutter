@@ -24,10 +24,10 @@ class SettingsView extends StatelessWidget {
           ),
           const Divider(),
           const _SectionHeader(title: '关于'),
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('欧思魔控'),
-            subtitle: const Text('Osmo 设备 Flutter 控制端 v1.0.0'),
+          const ListTile(
+            leading: Icon(Icons.info_outline),
+            title: Text('欧思魔控'),
+            subtitle: Text('Osmo 设备 Flutter 控制端 v1.0.0'),
           ),
           ListTile(
             leading: const Icon(Icons.code),

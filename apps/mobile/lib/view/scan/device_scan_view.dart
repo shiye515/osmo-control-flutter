@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../models/scan_result_model.dart';
 import '../../providers/ble_provider.dart';
@@ -64,7 +63,7 @@ class _DeviceScanViewState extends State<DeviceScanView> {
                         result: result,
                         isConnecting:
                             _connecting && _connectingId == result.deviceId,
-                        onConnect: () => _onConnect(result, session, context),
+                        onConnect: () => _onConnect(result, session),
                       );
                     },
                   ),
@@ -75,7 +74,7 @@ class _DeviceScanViewState extends State<DeviceScanView> {
   }
 
   Future<void> _onConnect(
-      ScanResultModel result, SessionProvider session, BuildContext context) async {
+      ScanResultModel result, SessionProvider session) async {
     setState(() {
       _connecting = true;
       _connectingId = result.deviceId;
@@ -87,8 +86,9 @@ class _DeviceScanViewState extends State<DeviceScanView> {
       _connecting = false;
       _connectingId = null;
     });
+    if (!mounted) return;
     if (success) {
-      context.pop();
+      Navigator.of(context).pop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('连接失败，请重试')),

@@ -16,7 +16,7 @@ class AppTheme {
         brightness: Brightness.light,
       ),
       appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -37,7 +37,7 @@ class AppTheme {
         brightness: Brightness.dark,
       ),
       appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),

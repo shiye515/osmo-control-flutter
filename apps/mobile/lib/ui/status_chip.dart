@@ -11,8 +11,8 @@ class StatusChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: connected
-            ? AppTheme.connectedColor.withOpacity(0.1)
-            : AppTheme.disconnectedColor.withOpacity(0.1),
+            ? AppTheme.connectedColor.withValues(alpha: 0.1)
+            : AppTheme.disconnectedColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: connected

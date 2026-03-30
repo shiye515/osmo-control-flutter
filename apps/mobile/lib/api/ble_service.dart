@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:logging/logging.dart';
 
@@ -14,8 +13,7 @@ class BleService {
 
   final _scanResultsController =
       StreamController<List<ScanResultModel>>.broadcast();
-  final _connectionStateController =
-      StreamController<bool>.broadcast();
+  final _connectionStateController = StreamController<bool>.broadcast();
 
   Stream<List<ScanResultModel>> get scanResults =>
       _scanResultsController.stream;
@@ -24,7 +22,6 @@ class BleService {
   final Map<String, ScanResultModel> _discovered = {};
   BluetoothDevice? _connectedDevice;
   BluetoothCharacteristic? _writeCharacteristic;
-  BluetoothCharacteristic? _notifyCharacteristic;
 
   StreamController<List<int>>? _notifyController;
   Stream<List<int>>? get notifyStream => _notifyController?.stream;
@@ -75,7 +72,10 @@ class BleService {
       final device = BluetoothDevice.fromId(deviceId);
       _connectedDevice = device;
 
-      await device.connect(timeout: const Duration(seconds: 10));
+      await device.connect(
+        timeout: const Duration(seconds: 10),
+        license: License.free,
+      );
 
       final services = await device.discoverServices();
       for (final service in services) {
@@ -86,7 +86,6 @@ class BleService {
             if (uuid == AppConstants.osmoWriteCharUuid) {
               _writeCharacteristic = char;
             } else if (uuid == AppConstants.osmoNotifyCharUuid) {
-              _notifyCharacteristic = char;
               await char.setNotifyValue(true);
               _notifyController = StreamController<List<int>>.broadcast();
               char.lastValueStream.listen(_notifyController!.add);
@@ -109,7 +108,6 @@ class BleService {
     await _connectedDevice?.disconnect();
     _connectedDevice = null;
     _writeCharacteristic = null;
-    _notifyCharacteristic = null;
     _notifyController?.close();
     _notifyController = null;
     _connectionStateController.add(false);

@@ -89,16 +89,25 @@ class SessionProvider extends ChangeNotifier {
   void _parseResponse(List<int> data) {
     final payload = ProtocolCodec.parseResponse(data);
     if (payload == null) return;
-    // Update camera status from telemetry responses
-    if (data.length > 11) {
-      final cmdSet = data[10];
-      final cmdId = data[11];
-      if (cmdSet == 0x01 && cmdId == 0x4B) {
-        // Recording toggle response
-        _cameraStatus = _cameraStatus.copyWith(
-          isRecording: !_cameraStatus.isRecording,
-        );
-      }
+    if (data.length < 12) return;
+
+    final cmdSet = data[10];
+    final cmdId = data[11];
+
+    // DUML response: first payload byte is ack code (0x00 = success)
+    final ackCode = payload.isNotEmpty ? payload[0] : 0xFF;
+
+    if (ackCode != 0x00) {
+      _log.warning('Command failed: cmdSet=$cmdSet, cmdId=$cmdId, ack=$ackCode');
+      return;
+    }
+
+    // Recording toggle response (cmdSet 0x01, cmdId 0x4B)
+    if (cmdSet == 0x01 && cmdId == 0x4B) {
+      _cameraStatus = _cameraStatus.copyWith(
+        isRecording: !_cameraStatus.isRecording,
+      );
+      _log.info('Recording state changed: ${_cameraStatus.isRecording}');
     }
   }
 
@@ -118,6 +127,7 @@ class SessionProvider extends ChangeNotifier {
     }
     final cmd = ProtocolCodec.buildToggleRecording();
     await sendRawCommand(cmd);
+    notifyListeners();
   }
 
   Future<void> takeSnapshot() async {
