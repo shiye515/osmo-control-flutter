@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/scan_result_model.dart';
@@ -122,7 +123,7 @@ class _DeviceScanViewState extends State<DeviceScanView> {
     });
     if (!mounted) return;
     if (success) {
-      Navigator.of(context).pop();
+      context.go('/workbench');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('连接失败，请重试')),

@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
     <application
-        android:label="欧思魔控"
+        android:label="Osmo 遥控器"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

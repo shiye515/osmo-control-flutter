@@ -26,7 +26,7 @@ class SettingsView extends StatelessWidget {
           const _SectionHeader(title: '关于'),
           const ListTile(
             leading: Icon(Icons.info_outline),
-            title: Text('欧思魔控'),
+            title: Text('Osmo 遥控器'),
             subtitle: Text('Osmo 设备 Flutter 控制端 v1.0.0'),
           ),
           ListTile(

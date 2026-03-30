@@ -16,8 +16,15 @@ class AppRouter {
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/workbench',
+    initialLocation: '/scan',
     routes: [
+      // Scan page (root, no shell)
+      GoRoute(
+        path: '/scan',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const DeviceScanView(),
+      ),
+      // Shell routes (only accessible when connected)
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) => HomeShell(child: child),
@@ -47,11 +54,6 @@ class AppRouter {
             ),
           ),
         ],
-      ),
-      GoRoute(
-        path: '/scan',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const DeviceScanView(),
       ),
     ],
   );

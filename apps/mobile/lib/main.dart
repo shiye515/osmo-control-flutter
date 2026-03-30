@@ -43,7 +43,7 @@ class OsmoControlApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp.router(
-        title: '欧思魔控',
+        title: 'Osmo 遥控器',
         theme: AppTheme.light(),
         darkTheme: AppTheme.dark(),
         themeMode: ThemeMode.system,

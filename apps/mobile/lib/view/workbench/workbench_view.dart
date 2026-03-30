@@ -20,75 +20,59 @@ class WorkbenchView extends StatelessWidget {
     final device = session.connectedDevice;
     final status = session.cameraStatus;
 
+    // If not connected, redirect to scan page
+    if (device == null || !device.isAuthenticated) {
+      // Use post-frame callback to avoid modifying during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.go('/scan');
+      });
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return ToastificationWrapper(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('欧思魔控'),
+          title: const Text('Osmo 遥控器'),
         ),
         body: RefreshIndicator(
           onRefresh: () async => session.requestVersion(),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              if (device != null && device.isAuthenticated) ...[
-                // Status tiles grid (top of workbench)
-                StatusTilesGrid(
-                  status: status,
-                  isConnected: device.isAuthenticated,
-                  deviceName: device.deviceName,
-                  onRefresh: () => session.requestVersion(),
-                  onDisconnect: () => session.disconnect(),
-                ),
-                const SizedBox(height: 16),
+              // Status tiles grid (top of workbench)
+              StatusTilesGrid(
+                status: status,
+                isConnected: device.isAuthenticated,
+                deviceName: device.deviceName,
+                onRefresh: () => session.requestVersion(),
+                onDisconnect: () {
+                  session.disconnect();
+                  context.go('/scan');
+                },
+              ),
+              const SizedBox(height: 16),
 
-                // Recording control
-                _RecordingCard(
-                  isRecording: status.isRecording,
-                  onToggle: () => _onToggleRecording(context, session),
-                  onSnapshot: () => _onSnapshot(context, session),
-                ),
-                const SizedBox(height: 16),
+              // Recording control
+              _RecordingCard(
+                isRecording: status.isRecording,
+                onToggle: () => _onToggleRecording(context, session),
+                onSnapshot: () => _onSnapshot(context, session),
+              ),
+              const SizedBox(height: 16),
 
-                // Mode selector
-                ModeSelector(
-                  currentMode: status.cameraMode,
-                  onModeSelected: (mode) => session.switchMode(mode),
-                ),
-                const SizedBox(height: 16),
+              // Mode selector
+              ModeSelector(
+                currentMode: status.cameraMode,
+                onModeSelected: (mode) => session.switchMode(mode),
+              ),
+              const SizedBox(height: 16),
 
-                // Device info
-                _DeviceInfoCard(device: device, status: status),
-                const SizedBox(height: 16),
+              // Device info
+              _DeviceInfoCard(device: device, status: status),
+              const SizedBox(height: 16),
 
-                // Quick actions
-                _QuickActionsCard(session: session),
-              ] else ...[
-                // Not connected
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 100),
-                      Icon(
-                        Icons.bluetooth_disabled,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        '未连接设备',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 24),
-                      FilledButton.icon(
-                        onPressed: () => context.push('/scan'),
-                        icon: const Icon(Icons.search),
-                        label: const Text('扫描设备'),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              // Quick actions
+              _QuickActionsCard(session: session),
             ],
           ),
         ),
