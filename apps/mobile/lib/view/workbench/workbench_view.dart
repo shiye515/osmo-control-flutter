@@ -82,44 +82,12 @@ class WorkbenchView extends StatelessWidget {
     );
   }
 
-  void _onToggleRecording(BuildContext context, SessionProvider session) async {
-    final wasRecording = session.cameraStatus.isRecording;
-    await session.toggleRecording();
-
-    // Wait a moment for response to be processed
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    if (context.mounted) {
-      final nowRecording = session.cameraStatus.isRecording;
-      // Only show toast if state actually changed
-      if (nowRecording != wasRecording) {
-        toastification.show(
-          context: context,
-          title: Text(nowRecording ? '开始录制' : '停止录制'),
-          type: ToastificationType.success,
-          autoCloseDuration: const Duration(seconds: 2),
-        );
-      } else {
-        toastification.show(
-          context: context,
-          title: const Text('操作失败'),
-          type: ToastificationType.error,
-          autoCloseDuration: const Duration(seconds: 2),
-        );
-      }
-    }
+  void _onToggleRecording(BuildContext context, SessionProvider session) {
+    session.toggleRecording();
   }
 
-  void _onSnapshot(BuildContext context, SessionProvider session) async {
-    await session.takeSnapshot();
-    if (context.mounted) {
-      toastification.show(
-        context: context,
-        title: const Text('已拍照'),
-        type: ToastificationType.success,
-        autoCloseDuration: const Duration(seconds: 2),
-      );
-    }
+  void _onSnapshot(BuildContext context, SessionProvider session) {
+    session.takeSnapshot();
   }
 }
 
