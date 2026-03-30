@@ -36,6 +36,17 @@ The system SHALL display each mode with icon and name.
 - **THEN** system shows mode icon and Chinese name
 - **AND** uses different opacity for center vs edge items
 
+### Requirement: Mode list display
+模式选择器 SHALL 根据设备类型动态显示支持的相机模式。
+
+#### Scenario: Osmo Action 4 mode selector
+- **WHEN** 连接设备为 Osmo Action 4
+- **THEN** 滚轮选择器仅显示 4 个模式：慢动作、视频、静止延时、拍照
+
+#### Scenario: Other device mode selector
+- **WHEN** 连接设备非 Osmo Action 4
+- **THEN** 滚轮选择器显示所有 7 个模式
+
 ### Requirement: Supported modes
 The system SHALL support the following camera modes:
 - 0x00: 慢动作 (Slow Motion)
@@ -45,6 +56,8 @@ The system SHALL support the following camera modes:
 - 0x0A: 运动延时 (Motion Timelapse)
 - 0x28: 低光视频 (Low Light Video)
 - 0x34: 人物跟随 (Person Follow)
+
+Osmo Action 4 仅支持前 4 种模式。
 
 #### Scenario: Unknown mode value
 - **WHEN** current mode is not in supported list

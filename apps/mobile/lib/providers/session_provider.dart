@@ -35,6 +35,7 @@ class SessionProvider extends ChangeNotifier {
   bool get isAuthenticated => _connectedDevice?.isAuthenticated ?? false;
   int get powerMode => _bleProvider?.powerMode ?? 0;
   bool get isSleeping => powerMode == 3;
+  int get cameraDeviceId => _bleProvider?.cameraDeviceId ?? 0;
   ({String id, String name})? get rememberedDevice => _rememberedDevice;
 
   StreamSubscription<List<int>>? _notifySubscription;

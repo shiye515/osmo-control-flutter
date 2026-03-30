@@ -8,11 +8,13 @@ import '../config/camera_modes.dart';
 /// Sends mode switch command after scroll ends.
 class ModeScrollSelector extends StatefulWidget {
   final int currentMode;
+  final int deviceId;
   final void Function(int mode) onModeSelected;
 
   const ModeScrollSelector({
     super.key,
     required this.currentMode,
+    required this.deviceId,
     required this.onModeSelected,
   });
 
@@ -26,10 +28,21 @@ class _ModeScrollSelectorState extends State<ModeScrollSelector> {
   int _selectedIndex = 0;
   bool _isUserScrolling = false;
 
+  /// Get supported modes based on device type.
+  List<CameraModeDef> get _supportedModes => getSupportedModes(widget.deviceId);
+
+  /// Find index of mode in supported modes list.
+  int _findModeIndex(int mode) {
+    for (int i = 0; i < _supportedModes.length; i++) {
+      if (_supportedModes[i].mode == mode) return i;
+    }
+    return 0;
+  }
+
   @override
   void initState() {
     super.initState();
-    _selectedIndex = getCameraModeIndex(widget.currentMode);
+    _selectedIndex = _findModeIndex(widget.currentMode);
     _scrollController = FixedExtentScrollController(initialItem: _selectedIndex);
   }
 
@@ -38,7 +51,7 @@ class _ModeScrollSelectorState extends State<ModeScrollSelector> {
     super.didUpdateWidget(oldWidget);
     // Update position when currentMode changes externally (e.g., from status push)
     if (oldWidget.currentMode != widget.currentMode && !_isUserScrolling) {
-      final newIndex = getCameraModeIndex(widget.currentMode);
+      final newIndex = _findModeIndex(widget.currentMode);
       if (newIndex != _selectedIndex) {
         _selectedIndex = newIndex;
         _scrollController.animateToItem(
@@ -47,6 +60,12 @@ class _ModeScrollSelectorState extends State<ModeScrollSelector> {
           curve: Curves.easeOut,
         );
       }
+    }
+    // Recreate controller if device changed (different mode list)
+    if (oldWidget.deviceId != widget.deviceId) {
+      _selectedIndex = _findModeIndex(widget.currentMode);
+      _scrollController.dispose();
+      _scrollController = FixedExtentScrollController(initialItem: _selectedIndex);
     }
   }
 
@@ -67,8 +86,8 @@ class _ModeScrollSelectorState extends State<ModeScrollSelector> {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
       _isUserScrolling = false;
-      if (_selectedIndex < kCameraModes.length) {
-        final selectedMode = kCameraModes[_selectedIndex].mode;
+      if (_selectedIndex < _supportedModes.length) {
+        final selectedMode = _supportedModes[_selectedIndex].mode;
         if (selectedMode != widget.currentMode) {
           HapticFeedback.mediumImpact();
           widget.onModeSelected(selectedMode);
@@ -132,9 +151,9 @@ class _ModeScrollSelectorState extends State<ModeScrollSelector> {
                     _selectedIndex = index;
                   },
                   childDelegate: ListWheelChildBuilderDelegate(
-                    childCount: kCameraModes.length,
+                    childCount: _supportedModes.length,
                     builder: (context, index) {
-                      final mode = kCameraModes[index];
+                      final mode = _supportedModes[index];
                       final isSelected = index == _selectedIndex;
 
                       return Center(

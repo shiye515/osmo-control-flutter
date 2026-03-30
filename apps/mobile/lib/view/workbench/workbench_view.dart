@@ -63,6 +63,7 @@ class WorkbenchView extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   child: ModeScrollSelector(
                     currentMode: status.cameraMode,
+                    deviceId: session.cameraDeviceId,
                     onModeSelected: (mode) => session.switchMode(mode),
                   ),
                 ),

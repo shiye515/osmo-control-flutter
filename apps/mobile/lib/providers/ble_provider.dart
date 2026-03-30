@@ -70,6 +70,9 @@ class BleProvider extends ChangeNotifier {
   /// Current power mode (0=normal, 3=sleep).
   int get powerMode => _bleService.powerMode;
 
+  /// Connected camera device ID.
+  int get cameraDeviceId => _bleService.cameraDeviceId;
+
   /// Stream of power mode changes.
   Stream<int> get powerModeStream => _bleService.powerModeStream;
 
