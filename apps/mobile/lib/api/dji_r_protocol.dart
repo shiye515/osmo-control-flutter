@@ -207,6 +207,49 @@ class DjiRProtocol {
     return buildPowerModeCommand(powerMode: 0);
   }
 
+  /// Build switch camera mode command (CmdSet=0x1D, CmdID=0x04).
+  /// Requires device_id from camera connection response.
+  /// mode: camera mode value (0x00=slow motion, 0x01=video, 0x02=timelapse, 0x05=photo, etc.)
+  static List<int> buildSwitchModeCommand(int mode, {required int deviceId}) {
+    final payload = <int>[];
+    // device_id (4B, LSB first)
+    payload.addAll([
+      deviceId & 0xFF,
+      (deviceId >> 8) & 0xFF,
+      (deviceId >> 16) & 0xFF,
+      (deviceId >> 24) & 0xFF,
+    ]);
+    // mode (1B)
+    payload.add(mode);
+    // reserved (4B)
+    payload.addAll([0x00, 0x00, 0x00, 0x00]);
+    return buildFrame(cmdSet: 0x1D, cmdId: 0x04, payload: payload);
+  }
+
+  /// Build toggle recording command (CmdSet=0x1D, CmdID=0x03).
+  /// recordCtrl: 0=start recording, 1=stop recording
+  static List<int> buildToggleRecordingCommand({required int deviceId, int recordCtrl = 0}) {
+    final payload = <int>[];
+    // device_id (4B, LSB first)
+    payload.addAll([
+      deviceId & 0xFF,
+      (deviceId >> 8) & 0xFF,
+      (deviceId >> 16) & 0xFF,
+      (deviceId >> 24) & 0xFF,
+    ]);
+    // record_ctrl (1B): 0=start, 1=stop
+    payload.add(recordCtrl);
+    // reserved (4B)
+    payload.addAll([0x00, 0x00, 0x00, 0x00]);
+    return buildFrame(cmdSet: 0x1D, cmdId: 0x03, payload: payload);
+  }
+
+  /// Build take snapshot command (CmdSet=0x1D, CmdID=0x03, start recording).
+  /// For photo mode, use same recording command to trigger snapshot.
+  static List<int> buildTakeSnapshotCommand({required int deviceId}) {
+    return buildToggleRecordingCommand(deviceId: deviceId, recordCtrl: 0);
+  }
+
   /// Build request camera status command (CmdSet=0x1D, CmdID=0x01).
   /// This requests the camera to send a status push (0x1D02).
   static List<int> buildRequestStatus() {

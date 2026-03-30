@@ -99,6 +99,21 @@ class BleProvider extends ChangeNotifier {
     return _bleService.subscribeCameraStatus();
   }
 
+  /// Send switch mode command.
+  Future<bool> sendSwitchModeCommand(int mode) async {
+    return _bleService.sendSwitchModeCommand(mode);
+  }
+
+  /// Send toggle recording command.
+  Future<bool> sendToggleRecordingCommand() async {
+    return _bleService.sendToggleRecordingCommand();
+  }
+
+  /// Send take snapshot command.
+  Future<bool> sendTakeSnapshotCommand() async {
+    return _bleService.sendTakeSnapshotCommand();
+  }
+
   /// Generate wake-up advertisement data for a sleeping camera.
   static List<int> getWakeUpAdvData(String macAddress) {
     return BleService.getWakeUpAdvData(macAddress);

@@ -8,7 +8,7 @@ import '../../models/camera_status_model.dart';
 import '../../models/session_device_model.dart';
 import '../../providers/session_provider.dart';
 import '../../ui/control_button.dart';
-import '../../ui/mode_selector.dart';
+import '../../ui/mode_scroll_selector.dart';
 import '../../ui/status_tiles_grid.dart';
 
 class WorkbenchView extends StatelessWidget {
@@ -31,9 +31,6 @@ class WorkbenchView extends StatelessWidget {
 
     return ToastificationWrapper(
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Osmo 遥控器'),
-        ),
         body: RefreshIndicator(
           onRefresh: () async => session.requestVersion(),
           child: ListView(
@@ -61,9 +58,14 @@ class WorkbenchView extends StatelessWidget {
               const SizedBox(height: 16),
 
               // Mode selector
-              ModeSelector(
-                currentMode: status.cameraMode,
-                onModeSelected: (mode) => session.switchMode(mode),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: ModeScrollSelector(
+                    currentMode: status.cameraMode,
+                    onModeSelected: (mode) => session.switchMode(mode),
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
 
@@ -140,7 +142,8 @@ class _RecordingCard extends StatelessWidget {
           children: [
             ControlButton(
               label: isRecording ? '停止录制' : '开始录制',
-              icon: isRecording ? Icons.stop_circle : Icons.radio_button_checked,
+              icon:
+                  isRecording ? Icons.stop_circle : Icons.radio_button_checked,
               color: isRecording
                   ? AppTheme.recordingColor
                   : Theme.of(context).colorScheme.primary,
@@ -177,8 +180,7 @@ class _DeviceInfoCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('设备信息',
-                style: Theme.of(context).textTheme.titleSmall),
+            Text('设备信息', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
             _InfoRow(label: '设备名称', value: device.deviceName),
             _InfoRow(label: '设备ID', value: device.deviceId),
@@ -236,13 +238,14 @@ class _QuickActionsCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text('快捷操作',
-                    style: Theme.of(context).textTheme.titleSmall),
+                Text('快捷操作', style: Theme.of(context).textTheme.titleSmall),
                 const Spacer(),
                 if (isSleeping)
                   Chip(
-                    avatar: const Icon(Icons.bedtime, size: 16, color: Colors.orange),
-                    label: const Text('休眠中', style: TextStyle(color: Colors.orange)),
+                    avatar: const Icon(Icons.bedtime,
+                        size: 16, color: Colors.orange),
+                    label: const Text('休眠中',
+                        style: TextStyle(color: Colors.orange)),
                     backgroundColor: Colors.orange.withValues(alpha: 0.1),
                   ),
               ],
@@ -252,7 +255,9 @@ class _QuickActionsCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: isConnected && !isSleeping ? () => _onSleep(context, session) : null,
+                    onPressed: isConnected && !isSleeping
+                        ? () => _onSleep(context, session)
+                        : null,
                     icon: const Icon(Icons.bedtime_outlined),
                     label: const Text('休眠'),
                   ),
@@ -260,7 +265,8 @@ class _QuickActionsCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: isConnected ? () => _onWake(context, session) : null,
+                    onPressed:
+                        isConnected ? () => _onWake(context, session) : null,
                     icon: const Icon(Icons.wb_sunny_outlined),
                     label: const Text('唤醒'),
                   ),
@@ -321,7 +327,8 @@ class _QuickActionsCard extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('忘记设备'),
-        content: Text('确定要忘记 "${session.rememberedDevice?.name}" 吗？\n下次启动应用将不会自动连接。'),
+        content: Text(
+            '确定要忘记 "${session.rememberedDevice?.name}" 吗？\n下次启动应用将不会自动连接。'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

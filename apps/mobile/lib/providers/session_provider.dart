@@ -149,9 +149,13 @@ class SessionProvider extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    final cmd = ProtocolCodec.buildToggleRecording();
-    await sendRawCommand(cmd);
-    notifyListeners();
+    _log.info('Sending toggle recording command');
+    final success = await _bleProvider?.sendToggleRecordingCommand() ?? false;
+    if (success) {
+      _addLog(LogDirection.system, 'Toggle recording command sent');
+    } else {
+      _addLog(LogDirection.system, 'Failed to send toggle recording command');
+    }
   }
 
   Future<void> takeSnapshot() async {
@@ -160,8 +164,13 @@ class SessionProvider extends ChangeNotifier {
       _addLog(LogDirection.system, '[Fake] Take snapshot');
       return;
     }
-    final cmd = ProtocolCodec.buildTakeSnapshot();
-    await sendRawCommand(cmd);
+    _log.info('Sending take snapshot command');
+    final success = await _bleProvider?.sendTakeSnapshotCommand() ?? false;
+    if (success) {
+      _addLog(LogDirection.system, 'Take snapshot command sent');
+    } else {
+      _addLog(LogDirection.system, 'Failed to send take snapshot command');
+    }
   }
 
   Future<void> switchMode(int mode) async {
@@ -172,8 +181,13 @@ class SessionProvider extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    final cmd = ProtocolCodec.buildSwitchMode(mode);
-    await sendRawCommand(cmd);
+    _log.info('Sending switch mode command: 0x${mode.toRadixString(16)}');
+    final success = await _bleProvider?.sendSwitchModeCommand(mode) ?? false;
+    if (success) {
+      _addLog(LogDirection.system, 'Switch mode command sent: 0x${mode.toRadixString(16)}');
+    } else {
+      _addLog(LogDirection.system, 'Failed to send switch mode command');
+    }
   }
 
   Future<void> sleep() async {

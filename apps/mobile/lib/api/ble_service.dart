@@ -209,6 +209,8 @@ class BleService {
 
   /// Handle parsed DJI R SDK frame.
   void _handleFrame(DjiRFrame frame) {
+    _log.info('RX DJI-R: cmdSet=0x${frame.cmdSet.toRadixString(16)}, cmdId=0x${frame.cmdId.toRadixString(16)}, isAck=${frame.isAck}');
+
     // Connection response (CmdSet=0x00, CmdID=0x19)
     if (frame.cmdSet == 0x00 && frame.cmdId == 0x19) {
       _handleConnectionFrame(frame);
@@ -217,6 +219,26 @@ class BleService {
     // Camera status push (CmdSet=0x1D, CmdID=0x02)
     if (frame.cmdSet == 0x1D && frame.cmdId == 0x02) {
       _handleCameraStatusPush(frame);
+    }
+
+    // Mode switch response (CmdSet=0x1D, CmdID=0x04)
+    if (frame.cmdSet == 0x1D && frame.cmdId == 0x04 && frame.isAck) {
+      final ackCode = frame.payload.isNotEmpty ? frame.payload[0] : 0xFF;
+      if (ackCode == 0x00) {
+        _log.info('Mode switch succeeded');
+      } else {
+        _log.warning('Mode switch failed: ack=$ackCode');
+      }
+    }
+
+    // Recording control response (CmdSet=0x1D, CmdID=0x03)
+    if (frame.cmdSet == 0x1D && frame.cmdId == 0x03 && frame.isAck) {
+      final ackCode = frame.payload.isNotEmpty ? frame.payload[0] : 0xFF;
+      if (ackCode == 0x00) {
+        _log.info('Recording control succeeded');
+      } else {
+        _log.warning('Recording control failed: ack=$ackCode');
+      }
     }
   }
 
@@ -253,7 +275,16 @@ class BleService {
   /// Handle camera status push.
   void _handleCameraStatusPush(DjiRFrame frame) {
     final payload = frame.payload;
+
+    // Log raw payload for debugging mode switching
+    _log.info('Status push: mode=${payload.isNotEmpty ? "0x${payload[0].toRadixString(16)}" : "N/A"}, status=${payload.length > 1 ? payload[1] : "N/A"}');
+
     final newStatus = CameraStatusModel.fromPayload(payload);
+
+    // Log mode changes
+    if (_cameraStatus.cameraMode != newStatus.cameraMode) {
+      _log.info('Camera mode changed: 0x${_cameraStatus.cameraMode.toRadixString(16)} -> 0x${newStatus.cameraMode.toRadixString(16)}');
+    }
 
     // Update power mode if changed
     if (payload.length > 28) {
@@ -279,6 +310,7 @@ class BleService {
   Future<bool> _writeFrame(List<int> frame) async {
     if (_writeCharacteristic == null) return false;
     try {
+      _log.info('TX DJI-R: ${frame.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ')}');
       await _writeCharacteristic!.write(frame, withoutResponse: false);
       return true;
     } catch (e) {
@@ -310,6 +342,7 @@ class BleService {
       return false;
     }
     try {
+      _log.info('TX DUML: ${data.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ')}');
       await _writeCharacteristic!.write(data, withoutResponse: false);
       return true;
     } catch (e) {
@@ -372,6 +405,30 @@ class BleService {
   Future<bool> subscribeCameraStatus() async {
     if (_writeCharacteristic == null) return false;
     final frame = DjiRProtocol.buildStatusSubscription();
+    return await _writeFrame(frame);
+  }
+
+  /// Send switch mode command.
+  Future<bool> sendSwitchModeCommand(int mode) async {
+    if (_writeCharacteristic == null) return false;
+    _log.info('Sending switch mode via DJI R SDK: 0x${mode.toRadixString(16)}');
+    final frame = DjiRProtocol.buildSwitchModeCommand(mode, deviceId: _cameraDeviceId);
+    return await _writeFrame(frame);
+  }
+
+  /// Send toggle recording command.
+  Future<bool> sendToggleRecordingCommand() async {
+    if (_writeCharacteristic == null) return false;
+    _log.info('Sending toggle recording via DJI R SDK');
+    final frame = DjiRProtocol.buildToggleRecordingCommand(deviceId: _cameraDeviceId);
+    return await _writeFrame(frame);
+  }
+
+  /// Send take snapshot command.
+  Future<bool> sendTakeSnapshotCommand() async {
+    if (_writeCharacteristic == null) return false;
+    _log.info('Sending take snapshot via DJI R SDK');
+    final frame = DjiRProtocol.buildTakeSnapshotCommand(deviceId: _cameraDeviceId);
     return await _writeFrame(frame);
   }
 

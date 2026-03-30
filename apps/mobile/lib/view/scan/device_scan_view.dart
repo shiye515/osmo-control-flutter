@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -27,6 +29,17 @@ class _DeviceScanViewState extends State<DeviceScanView> {
       // Then start scan
       context.read<BleProvider>().startScan();
     });
+    Timer(const Duration(milliseconds: 600), () {
+      if (mounted) {
+        init();
+      }
+    });
+  }
+
+  init() {
+    final ble = context.read<BleProvider>();
+    _autoConnectAttempted = false;
+    ble.startScan();
   }
 
   void _tryAutoConnect(SessionProvider session, List<ScanResultModel> results) {
@@ -80,8 +93,7 @@ class _DeviceScanViewState extends State<DeviceScanView> {
       ),
       body: Column(
         children: [
-          if (!ble.isAvailable)
-            const _BleUnavailableBanner(),
+          if (!ble.isAvailable) const _BleUnavailableBanner(),
           if (session.rememberedDevice != null && !_autoConnectAttempted)
             _AutoConnectBanner(deviceName: session.rememberedDevice!.name),
           Expanded(
@@ -114,8 +126,7 @@ class _DeviceScanViewState extends State<DeviceScanView> {
       _connecting = true;
       _connectingId = result.deviceId;
     });
-    final success =
-        await session.connect(result.deviceId, result.deviceName);
+    final success = await session.connect(result.deviceId, result.deviceName);
     if (!mounted) return;
     setState(() {
       _connecting = false;
