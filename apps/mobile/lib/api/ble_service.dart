@@ -417,10 +417,15 @@ class BleService {
   }
 
   /// Send toggle recording command.
-  Future<bool> sendToggleRecordingCommand() async {
+  /// isRecording: true = send stop command, false = send start command
+  Future<bool> sendToggleRecordingCommand(bool isRecording) async {
     if (_writeCharacteristic == null) return false;
-    _log.info('Sending toggle recording via DJI R SDK');
-    final frame = DjiRProtocol.buildToggleRecordingCommand(deviceId: _cameraDeviceId);
+    final action = isRecording ? 'stop' : 'start';
+    _log.info('Sending $action recording via DJI R SDK');
+    final frame = DjiRProtocol.buildToggleRecordingCommand(
+      deviceId: _cameraDeviceId,
+      recordCtrl: isRecording ? 1 : 0,  // 0=start, 1=stop
+    );
     return await _writeFrame(frame);
   }
 

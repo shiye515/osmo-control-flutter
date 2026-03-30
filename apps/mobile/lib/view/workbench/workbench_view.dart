@@ -41,7 +41,6 @@ class WorkbenchView extends StatelessWidget {
                 status: status,
                 isConnected: device.isAuthenticated,
                 deviceName: device.deviceName,
-                onRefresh: () => session.requestVersion(),
                 onDisconnect: () {
                   session.disconnect();
                   context.go('/scan');

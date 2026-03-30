@@ -108,8 +108,9 @@ class BleProvider extends ChangeNotifier {
   }
 
   /// Send toggle recording command.
-  Future<bool> sendToggleRecordingCommand() async {
-    return _bleService.sendToggleRecordingCommand();
+  /// isRecording: true = send stop command, false = send start command
+  Future<bool> sendToggleRecordingCommand(bool isRecording) async {
+    return _bleService.sendToggleRecordingCommand(isRecording);
   }
 
   /// Send take snapshot command.

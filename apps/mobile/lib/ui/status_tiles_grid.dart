@@ -7,7 +7,6 @@ class StatusTilesGrid extends StatelessWidget {
   final CameraStatusModel status;
   final bool isConnected;
   final String? deviceName;
-  final VoidCallback? onRefresh;
   final VoidCallback? onDisconnect;
 
   const StatusTilesGrid({
@@ -15,7 +14,6 @@ class StatusTilesGrid extends StatelessWidget {
     required this.status,
     required this.isConnected,
     this.deviceName,
-    this.onRefresh,
     this.onDisconnect,
   });
 
@@ -32,23 +30,13 @@ class StatusTilesGrid extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         GridView.count(
-          crossAxisCount: 3,
+          crossAxisCount: 4,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
           childAspectRatio: 1.0,
           children: tiles,
-        ),
-        const SizedBox(height: 8),
-        // Refresh button
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton.icon(
-            onPressed: onRefresh,
-            icon: const Icon(Icons.refresh, size: 18),
-            label: const Text('刷新状态'),
-          ),
         ),
       ],
     );
@@ -206,20 +194,12 @@ class _ConnectionTile extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '已连接',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
+              // '已连接',
               deviceName,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.visible,
             ),
           ],
         ),

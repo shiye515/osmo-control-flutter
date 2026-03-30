@@ -150,12 +150,13 @@ class SessionProvider extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    _log.info('Sending toggle recording command');
-    final success = await _bleProvider?.sendToggleRecordingCommand() ?? false;
+    final isRecording = _cameraStatus.isRecording;
+    _log.info('Sending ${isRecording ? "stop" : "start"} recording command');
+    final success = await _bleProvider?.sendToggleRecordingCommand(isRecording) ?? false;
     if (success) {
-      _addLog(LogDirection.system, 'Toggle recording command sent');
+      _addLog(LogDirection.system, '${isRecording ? "Stop" : "Start"} recording command sent');
     } else {
-      _addLog(LogDirection.system, 'Failed to send toggle recording command');
+      _addLog(LogDirection.system, 'Failed to send recording command');
     }
   }
 
