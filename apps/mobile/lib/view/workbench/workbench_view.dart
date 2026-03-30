@@ -7,11 +7,9 @@ import '../../config/app_theme.dart';
 import '../../models/camera_status_model.dart';
 import '../../models/session_device_model.dart';
 import '../../providers/session_provider.dart';
-import '../../utils/format_utils.dart';
-import '../../ui/status_chip.dart';
 import '../../ui/control_button.dart';
-import '../../ui/gimbal_display.dart';
 import '../../ui/mode_selector.dart';
+import '../../ui/status_tiles_grid.dart';
 
 class WorkbenchView extends StatelessWidget {
   const WorkbenchView({super.key});
@@ -26,25 +24,23 @@ class WorkbenchView extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('欧思魔控'),
-          actions: [
-            if (device != null)
-              IconButton(
-                icon: const Icon(Icons.bluetooth_disabled),
-                tooltip: '断开连接',
-                onPressed: () => session.disconnect(),
-              ),
-          ],
         ),
         body: RefreshIndicator(
           onRefresh: () async => session.requestVersion(),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // Connection card
-              _ConnectionCard(device: device, session: session),
-              const SizedBox(height: 16),
-
               if (device != null && device.isAuthenticated) ...[
+                // Status tiles grid (top of workbench)
+                StatusTilesGrid(
+                  status: status,
+                  isConnected: device.isAuthenticated,
+                  deviceName: device.deviceName,
+                  onRefresh: () => session.requestVersion(),
+                  onDisconnect: () => session.disconnect(),
+                ),
+                const SizedBox(height: 16),
+
                 // Recording control
                 _RecordingCard(
                   isRecording: status.isRecording,
@@ -55,16 +51,8 @@ class WorkbenchView extends StatelessWidget {
 
                 // Mode selector
                 ModeSelector(
-                  currentMode: status.currentMode,
+                  currentMode: status.cameraMode,
                   onModeSelected: (mode) => session.switchMode(mode),
-                ),
-                const SizedBox(height: 16),
-
-                // Gimbal display
-                GimbalDisplay(
-                  pitch: status.gimbalPitch,
-                  roll: status.gimbalRoll,
-                  yaw: status.gimbalYaw,
                 ),
                 const SizedBox(height: 16),
 
@@ -74,6 +62,32 @@ class WorkbenchView extends StatelessWidget {
 
                 // Quick actions
                 _QuickActionsCard(session: session),
+              ] else ...[
+                // Not connected - show scan button
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 100),
+                      Icon(
+                        Icons.bluetooth_disabled,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        '未连接设备',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 24),
+                      FilledButton.icon(
+                        onPressed: () => context.push('/scan'),
+                        icon: const Icon(Icons.search),
+                        label: const Text('扫描设备'),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ],
           ),
@@ -120,72 +134,6 @@ class WorkbenchView extends StatelessWidget {
         autoCloseDuration: const Duration(seconds: 2),
       );
     }
-  }
-}
-
-class _ConnectionCard extends StatelessWidget {
-  final SessionDeviceModel? device;
-  final SessionProvider session;
-  const _ConnectionCard({required this.device, required this.session});
-
-  @override
-  Widget build(BuildContext context) {
-    final isConnected = device?.isConnected ?? false;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  isConnected ? Icons.bluetooth_connected : Icons.bluetooth,
-                  color: isConnected
-                      ? AppTheme.connectedColor
-                      : AppTheme.disconnectedColor,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  isConnected
-                      ? device?.deviceName ?? 'Unknown'
-                      : '未连接设备',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const Spacer(),
-                StatusChip(connected: isConnected),
-              ],
-            ),
-            const SizedBox(height: 12),
-            if (!isConnected)
-              FilledButton.icon(
-                onPressed: () => context.push('/scan'),
-                icon: const Icon(Icons.search),
-                label: const Text('扫描设备'),
-              )
-            else
-              Row(
-                children: [
-                  if (device?.batteryLevel != null)
-                    Chip(
-                      avatar: const Icon(Icons.battery_5_bar, size: 16),
-                      label: Text(
-                          FormatUtils.formatBattery(device!.batteryLevel)),
-                    ),
-                  if (device?.firmwareVersion != null) ...[
-                    const SizedBox(width: 8),
-                    Chip(
-                      avatar: const Icon(Icons.info_outline, size: 16),
-                      label: Text(device!.firmwareVersion!),
-                    ),
-                  ],
-                ],
-              ),
-          ],
-        ),
-      ),
-    );
   }
 }
 
@@ -252,10 +200,6 @@ class _DeviceInfoCard extends StatelessWidget {
             _InfoRow(label: '设备ID', value: device.deviceId),
             if (device.firmwareVersion != null)
               _InfoRow(label: '固件版本', value: device.firmwareVersion!),
-            if (status.batteryPercent != null)
-              _InfoRow(
-                  label: '电量',
-                  value: FormatUtils.formatBattery(status.batteryPercent)),
           ],
         ),
       ),

@@ -207,6 +207,27 @@ class DjiRProtocol {
     return buildPowerModeCommand(powerMode: 0);
   }
 
+  /// Build request camera status command (CmdSet=0x1D, CmdID=0x01).
+  /// This requests the camera to send a status push (0x1D02).
+  static List<int> buildRequestStatus() {
+    return buildFrame(cmdSet: 0x1D, cmdId: 0x01, payload: []);
+  }
+
+  /// Build status subscription command (CmdSet=0x1D, CmdID=0x05).
+  /// Subscribes to periodic status push (0x1D02).
+  /// pushMode: 3=periodic + on-change
+  /// pushFreq: 20=2Hz
+  static List<int> buildStatusSubscription({
+    int pushMode = 3,
+    int pushFreq = 20,
+  }) {
+    return buildFrame(
+      cmdSet: 0x1D,
+      cmdId: 0x05,
+      payload: [pushMode, pushFreq, 0x00, 0x00, 0x00, 0x00],
+    );
+  }
+
   /// Generate wake-up advertisement data for a sleeping camera.
   /// Format: [10, 0xFF, 'W','K','P', MAC(reversed)]
   static List<int> buildWakeUpAdvData(String macAddress) {

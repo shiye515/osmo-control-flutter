@@ -4,6 +4,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../api/ble_service.dart';
 import '../models/scan_result_model.dart';
+import '../models/camera_status_model.dart';
 
 class BleProvider extends ChangeNotifier {
   final BleService _bleService = BleService();
@@ -72,6 +73,12 @@ class BleProvider extends ChangeNotifier {
   /// Stream of power mode changes.
   Stream<int> get powerModeStream => _bleService.powerModeStream;
 
+  /// Current camera status.
+  CameraStatusModel get cameraStatus => _bleService.cameraStatus;
+
+  /// Stream of camera status changes.
+  Stream<CameraStatusModel> get cameraStatusStream => _bleService.cameraStatusStream;
+
   /// Send sleep command to camera.
   Future<bool> sendSleepCommand() async {
     return _bleService.sendSleepCommand();
@@ -80,6 +87,16 @@ class BleProvider extends ChangeNotifier {
   /// Send wake command to camera.
   Future<bool> sendWakeCommand() async {
     return _bleService.sendWakeCommand();
+  }
+
+  /// Request camera status push.
+  Future<bool> requestCameraStatus() async {
+    return _bleService.requestCameraStatus();
+  }
+
+  /// Subscribe to camera status push.
+  Future<bool> subscribeCameraStatus() async {
+    return _bleService.subscribeCameraStatus();
   }
 
   /// Generate wake-up advertisement data for a sleeping camera.

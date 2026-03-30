@@ -35,6 +35,7 @@ class SessionProvider extends ChangeNotifier {
 
   StreamSubscription<List<int>>? _notifySubscription;
   StreamSubscription<int>? _powerModeSubscription;
+  StreamSubscription<CameraStatusModel>? _cameraStatusSubscription;
 
   void updateBleProvider(BleProvider ble) {
     _bleProvider = ble;
@@ -86,6 +87,14 @@ class SessionProvider extends ChangeNotifier {
     _powerModeSubscription =
         _bleProvider?.powerModeStream.listen((mode) {
           _log.info('Power mode changed: $mode (${mode == 3 ? "sleep" : "normal"})');
+          notifyListeners();
+        });
+
+    _cameraStatusSubscription?.cancel();
+    _cameraStatusSubscription =
+        _bleProvider?.cameraStatusStream.listen((status) {
+          _cameraStatus = status;
+          _log.info('Camera status updated: ${status.cameraStatusDisplay}');
           notifyListeners();
         });
   }
@@ -153,7 +162,7 @@ class SessionProvider extends ChangeNotifier {
   Future<void> switchMode(int mode) async {
     if (!isConnected && !_isFakeMode) return;
     if (_isFakeMode) {
-      _cameraStatus = _cameraStatus.copyWith(currentMode: mode);
+      _cameraStatus = _cameraStatus.copyWith(cameraMode: mode);
       _addLog(LogDirection.system, '[Fake] Switch mode to $mode');
       notifyListeners();
       return;
@@ -195,12 +204,12 @@ class SessionProvider extends ChangeNotifier {
   Future<void> requestVersion() async {
     if (!isConnected && !_isFakeMode) return;
     if (_isFakeMode) {
-      _cameraStatus = _cameraStatus.copyWith(firmwareVersion: 'Fake v1.0.0');
+      _connectedDevice = _connectedDevice?.copyWith(firmwareVersion: 'Fake v1.0.0');
+      _addLog(LogDirection.system, '[Fake] Status subscription');
       notifyListeners();
       return;
     }
-    final cmd = ProtocolCodec.buildRequestVersion();
-    await sendRawCommand(cmd);
+    await _bleProvider?.subscribeCameraStatus();
   }
 
   Future<void> pushGps(
@@ -221,6 +230,8 @@ class SessionProvider extends ChangeNotifier {
     _connectedDevice = null;
     _notifySubscription?.cancel();
     _powerModeSubscription?.cancel();
+    _cameraStatusSubscription?.cancel();
+    _cameraStatus = const CameraStatusModel();
     _addLog(LogDirection.system, 'Disconnected');
     notifyListeners();
   }
@@ -237,11 +248,12 @@ class SessionProvider extends ChangeNotifier {
       );
       _cameraStatus = const CameraStatusModel(
         isRecording: false,
-        currentMode: 0,
-        gimbalPitch: -10.0,
-        gimbalRoll: 0.0,
-        gimbalYaw: 5.0,
+        cameraMode: 1, // Video mode
+        cameraStatus: 1, // Idle
         batteryPercent: 85,
+        remainCapacityMB: 32768, // 32GB
+        videoResolution: 0, // 4K
+        fpsIdx: 60,
       );
       _addLog(LogDirection.system, 'Fake device mode enabled');
     } else {

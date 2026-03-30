@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 
 import '../config/app_constants.dart';
 import '../models/scan_result_model.dart';
+import '../models/camera_status_model.dart';
 import 'dji_r_protocol.dart';
 
 class BleService {
@@ -238,6 +239,8 @@ class BleService {
           _log.info('Connected to camera');
           _connectionStateController.add(true);
           _authCompleter?.complete(true);
+          // Subscribe to status push after connection
+          subscribeCameraStatus();
         });
       } else {
         _log.warning('Camera rejected connection');
@@ -250,10 +253,17 @@ class BleService {
   /// Handle camera status push.
   void _handleCameraStatusPush(DjiRFrame frame) {
     final payload = frame.payload;
-    if (payload.length >= 29) {
+    final newStatus = CameraStatusModel.fromPayload(payload);
+
+    // Update power mode if changed
+    if (payload.length > 28) {
       final powerMode = payload[28];
       _updatePowerMode(powerMode);
     }
+
+    // Emit status update
+    _cameraStatus = newStatus;
+    _cameraStatusController.add(newStatus);
   }
 
   /// Update power mode state.
@@ -289,6 +299,7 @@ class BleService {
     _frameBuffer.clear();
     _cameraDeviceId = 0;
     _powerMode = 0;
+    _cameraStatus = const CameraStatusModel();
     _connectionStateController.add(false);
   }
 
@@ -314,11 +325,21 @@ class BleService {
   int _powerMode = 0; // 0=normal, 3=sleep
   final _powerModeController = StreamController<int>.broadcast();
 
+  // Camera status state
+  CameraStatusModel _cameraStatus = const CameraStatusModel();
+  final _cameraStatusController = StreamController<CameraStatusModel>.broadcast();
+
   /// Current power mode (0=normal, 3=sleep).
   int get powerMode => _powerMode;
 
   /// Stream of power mode changes.
   Stream<int> get powerModeStream => _powerModeController.stream;
+
+  /// Current camera status.
+  CameraStatusModel get cameraStatus => _cameraStatus;
+
+  /// Stream of camera status changes.
+  Stream<CameraStatusModel> get cameraStatusStream => _cameraStatusController.stream;
 
   /// Send sleep command to camera.
   Future<bool> sendSleepCommand() async {
@@ -338,6 +359,22 @@ class BleService {
     return await _writeFrame(frame);
   }
 
+  /// Request camera status push.
+  Future<bool> requestCameraStatus() async {
+    if (_writeCharacteristic == null) return false;
+
+    _log.info('Requesting camera status');
+    final frame = DjiRProtocol.buildRequestStatus();
+    return await _writeFrame(frame);
+  }
+
+  /// Subscribe to camera status push.
+  Future<bool> subscribeCameraStatus() async {
+    if (_writeCharacteristic == null) return false;
+    final frame = DjiRProtocol.buildStatusSubscription();
+    return await _writeFrame(frame);
+  }
+
   /// Generate wake-up advertisement data for a sleeping camera.
   static List<int> getWakeUpAdvData(String macAddress) {
     return DjiRProtocol.buildWakeUpAdvData(macAddress);
@@ -349,6 +386,7 @@ class BleService {
     _scanResultsController.close();
     _connectionStateController.close();
     _powerModeController.close();
+    _cameraStatusController.close();
     _notifyController?.close();
   }
 }
