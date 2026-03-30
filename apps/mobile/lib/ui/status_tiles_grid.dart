@@ -8,6 +8,7 @@ class StatusTilesGrid extends StatelessWidget {
   final bool isConnected;
   final String? deviceName;
   final VoidCallback? onDisconnect;
+  final VoidCallback? onRecordControl;  // Toggle recording or take photo
 
   const StatusTilesGrid({
     super.key,
@@ -15,6 +16,7 @@ class StatusTilesGrid extends StatelessWidget {
     required this.isConnected,
     this.deviceName,
     this.onDisconnect,
+    this.onRecordControl,
   });
 
   @override
@@ -44,6 +46,12 @@ class StatusTilesGrid extends StatelessWidget {
 
   List<Widget> _buildTiles(ThemeData theme) {
     return [
+      // Record control tile (first position)
+      _RecordControlTile(
+        isRecording: status.isRecording,
+        cameraMode: status.cameraMode,
+        onTap: onRecordControl,
+      ),
       // Connection status (clickable to disconnect)
       _ConnectionTile(
         deviceName: deviceName ?? 'Osmo',
@@ -198,6 +206,69 @@ class _ConnectionTile extends StatelessWidget {
               deviceName,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Record control tile - smart tile that shows record/stop/photo based on state.
+class _RecordControlTile extends StatelessWidget {
+  final bool isRecording;
+  final int cameraMode;
+  final VoidCallback? onTap;
+
+  const _RecordControlTile({
+    required this.isRecording,
+    required this.cameraMode,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    // Determine action based on camera state
+    final isPhotoMode = cameraMode == 0x05;
+    final iconData = isRecording
+        ? Icons.stop_circle
+        : (isPhotoMode ? Icons.camera_alt : Icons.fiber_manual_record);
+    final label = isRecording
+        ? '停止'
+        : (isPhotoMode ? '拍照' : '录制');
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isRecording
+              ? theme.colorScheme.errorContainer
+              : theme.colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              iconData,
+              size: 28,
+              color: isRecording
+                  ? theme.colorScheme.onErrorContainer
+                  : theme.colorScheme.onPrimaryContainer,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: isRecording
+                    ? theme.colorScheme.onErrorContainer
+                    : theme.colorScheme.onPrimaryContainer,
               ),
               textAlign: TextAlign.center,
             ),
