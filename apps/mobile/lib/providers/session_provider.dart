@@ -8,12 +8,14 @@ import '../models/session_device_model.dart';
 import '../models/camera_status_model.dart';
 import '../models/scan_result_model.dart';
 import '../models/debug_log_model.dart';
+import '../services/device_memory_service.dart';
 import 'ble_provider.dart';
 
 class SessionProvider extends ChangeNotifier {
   static final _log = Logger('SessionProvider');
 
   BleProvider? _bleProvider;
+  final DeviceMemoryService _deviceMemory = DeviceMemoryService();
 
   SessionDeviceModel? _connectedDevice;
   CameraStatusModel _cameraStatus = const CameraStatusModel();
@@ -21,6 +23,7 @@ class SessionProvider extends ChangeNotifier {
   final List<DebugLogEntry> _logs = [];
   bool _isFakeMode = false;
   String? _lastError;
+  ({String id, String name})? _rememberedDevice;
 
   SessionDeviceModel? get connectedDevice => _connectedDevice;
   CameraStatusModel get cameraStatus => _cameraStatus;
@@ -32,6 +35,7 @@ class SessionProvider extends ChangeNotifier {
   bool get isAuthenticated => _connectedDevice?.isAuthenticated ?? false;
   int get powerMode => _bleProvider?.powerMode ?? 0;
   bool get isSleeping => powerMode == 3;
+  ({String id, String name})? get rememberedDevice => _rememberedDevice;
 
   StreamSubscription<List<int>>? _notifySubscription;
   StreamSubscription<int>? _powerModeSubscription;
@@ -69,6 +73,9 @@ class SessionProvider extends ChangeNotifier {
       );
       _addLog(LogDirection.system, 'Connected to $deviceName');
       _subscribeNotifications();
+      // Save device to memory
+      await _deviceMemory.saveDevice(deviceId, deviceName);
+      _rememberedDevice = (id: deviceId, name: deviceName);
     } else {
       _connectedDevice = null;
       _lastError = 'Connection failed';
@@ -94,13 +101,11 @@ class SessionProvider extends ChangeNotifier {
     _cameraStatusSubscription =
         _bleProvider?.cameraStatusStream.listen((status) {
           _cameraStatus = status;
-          _log.info('Camera status updated: ${status.cameraStatusDisplay}');
           notifyListeners();
         });
   }
 
   void _handleNotification(List<int> data) {
-    _addLog(LogDirection.received, 'RX: ${_hexStr(data)}', rawBytes: data);
     _parseResponse(data);
     notifyListeners();
   }
@@ -233,6 +238,20 @@ class SessionProvider extends ChangeNotifier {
     _cameraStatusSubscription?.cancel();
     _cameraStatus = const CameraStatusModel();
     _addLog(LogDirection.system, 'Disconnected');
+    notifyListeners();
+  }
+
+  /// Load remembered device from storage.
+  Future<void> loadRememberedDevice() async {
+    _rememberedDevice = await _deviceMemory.getDevice();
+    notifyListeners();
+  }
+
+  /// Forget the remembered device.
+  Future<void> forgetDevice() async {
+    await _deviceMemory.clearDevice();
+    _rememberedDevice = null;
+    _addLog(LogDirection.system, 'Device forgotten');
     notifyListeners();
   }
 

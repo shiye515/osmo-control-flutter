@@ -15,19 +15,45 @@ class DeviceScanView extends StatefulWidget {
 class _DeviceScanViewState extends State<DeviceScanView> {
   bool _connecting = false;
   String? _connectingId;
+  bool _autoConnectAttempted = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Load remembered device first
+      context.read<SessionProvider>().loadRememberedDevice();
+      // Then start scan
       context.read<BleProvider>().startScan();
     });
+  }
+
+  void _tryAutoConnect(SessionProvider session, List<ScanResultModel> results) {
+    if (_autoConnectAttempted || _connecting) return;
+
+    final remembered = session.rememberedDevice;
+    if (remembered == null) return;
+
+    // Check if remembered device is in scan results
+    final found = results.any((r) => r.deviceId == remembered.id);
+    if (found) {
+      _autoConnectAttempted = true;
+      _onConnect(
+        results.firstWhere((r) => r.deviceId == remembered.id),
+        session,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final ble = context.watch<BleProvider>();
     final session = context.watch<SessionProvider>();
+
+    // Try auto-connect when scan results update
+    if (ble.scanResults.isNotEmpty && !_autoConnectAttempted) {
+      _tryAutoConnect(session, ble.scanResults);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -44,7 +70,10 @@ class _DeviceScanViewState extends State<DeviceScanView> {
           else
             IconButton(
               icon: const Icon(Icons.refresh),
-              onPressed: () => ble.startScan(),
+              onPressed: () {
+                _autoConnectAttempted = false;
+                ble.startScan();
+              },
             ),
         ],
       ),
@@ -52,6 +81,8 @@ class _DeviceScanViewState extends State<DeviceScanView> {
         children: [
           if (!ble.isAvailable)
             const _BleUnavailableBanner(),
+          if (session.rememberedDevice != null && !_autoConnectAttempted)
+            _AutoConnectBanner(deviceName: session.rememberedDevice!.name),
           Expanded(
             child: ble.scanResults.isEmpty
                 ? _EmptyState(isScanning: ble.isScanning)
@@ -59,10 +90,13 @@ class _DeviceScanViewState extends State<DeviceScanView> {
                     itemCount: ble.scanResults.length,
                     itemBuilder: (context, i) {
                       final result = ble.scanResults[i];
+                      final isRemembered =
+                          session.rememberedDevice?.id == result.deviceId;
                       return _DeviceTile(
                         result: result,
                         isConnecting:
                             _connecting && _connectingId == result.deviceId,
+                        isRemembered: isRemembered,
                         onConnect: () => _onConnect(result, session),
                       );
                     },
@@ -94,6 +128,37 @@ class _DeviceScanViewState extends State<DeviceScanView> {
         const SnackBar(content: Text('连接失败，请重试')),
       );
     }
+  }
+}
+
+class _AutoConnectBanner extends StatelessWidget {
+  final String deviceName;
+  const _AutoConnectBanner({required this.deviceName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: Theme.of(context).colorScheme.primaryContainer,
+      child: Row(
+        children: [
+          Icon(
+            Icons.bluetooth_searching,
+            size: 20,
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '正在寻找 $deviceName...',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -144,17 +209,43 @@ class _EmptyState extends StatelessWidget {
 class _DeviceTile extends StatelessWidget {
   final ScanResultModel result;
   final bool isConnecting;
+  final bool isRemembered;
   final VoidCallback onConnect;
   const _DeviceTile(
       {required this.result,
       required this.isConnecting,
+      required this.isRemembered,
       required this.onConnect});
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: const Icon(Icons.bluetooth),
-      title: Text(result.deviceName),
+      leading: Icon(
+        isRemembered ? Icons.bluetooth_connected : Icons.bluetooth,
+        color: isRemembered ? Theme.of(context).colorScheme.primary : null,
+      ),
+      title: Row(
+        children: [
+          Text(result.deviceName),
+          if (isRemembered) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                '曾连接',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
       subtitle: Text(result.deviceId),
       trailing: isConnecting
           ? const SizedBox(

@@ -1,4 +1,6 @@
-## ADDED Requirements
+# Connection Authentication Specification
+
+## Requirements
 
 ### Requirement: Connection request command
 The system SHALL send connection request (CmdSet=0x00, CmdID=0x19) to camera after BLE connection is established.
@@ -67,3 +69,14 @@ The system SHALL detect camera sleep state during BLE connection.
 - **WHEN** camera is in sleep mode during connection
 - **THEN** system can send wake command (power_mode=0)
 - **AND** system logs the wake command
+
+### Requirement: Save device on successful connection
+The system SHALL save connected device ID and name to persistent storage after successful authentication.
+
+#### Scenario: Save device after auth
+- **WHEN** camera connection authentication succeeds
+- **THEN** system saves device_id and device_name to SharedPreferences
+
+#### Scenario: Save device name
+- **WHEN** saving device to storage
+- **THEN** system stores both device ID (MAC address) and display name

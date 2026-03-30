@@ -63,7 +63,7 @@ class WorkbenchView extends StatelessWidget {
                 // Quick actions
                 _QuickActionsCard(session: session),
               ] else ...[
-                // Not connected - show scan button
+                // Not connected
                 Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -242,6 +242,7 @@ class _QuickActionsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isSleeping = session.isSleeping;
     final isConnected = session.isConnected;
+    final hasRememberedDevice = session.rememberedDevice != null;
 
     return Card(
       child: Padding(
@@ -290,6 +291,17 @@ class _QuickActionsCard extends StatelessWidget {
                 ),
               ],
             ),
+            if (hasRememberedDevice) ...[
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: () => _onForgetDevice(context, session),
+                icon: const Icon(Icons.delete_outline, size: 18),
+                label: const Text('忘记此设备'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -317,6 +329,41 @@ class _QuickActionsCard extends StatelessWidget {
         type: ToastificationType.success,
         autoCloseDuration: const Duration(seconds: 2),
       );
+    }
+  }
+
+  void _onForgetDevice(BuildContext context, SessionProvider session) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('忘记设备'),
+        content: Text('确定要忘记 "${session.rememberedDevice?.name}" 吗？\n下次启动应用将不会自动连接。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            child: const Text('忘记'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await session.forgetDevice();
+      if (context.mounted) {
+        toastification.show(
+          context: context,
+          title: const Text('已忘记设备'),
+          type: ToastificationType.success,
+          autoCloseDuration: const Duration(seconds: 2),
+        );
+      }
     }
   }
 }
