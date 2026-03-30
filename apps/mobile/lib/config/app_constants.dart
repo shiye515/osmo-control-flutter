@@ -1,8 +1,8 @@
 class AppConstants {
   // BLE
   static const String osmoServiceUuid = '0000FFF0-0000-1000-8000-00805F9B34FB';
-  static const String osmoWriteCharUuid = '0000FFF6-0000-1000-8000-00805F9B34FB';
-  static const String osmoNotifyCharUuid = '0000FFF7-0000-1000-8000-00805F9B34FB';
+  static const String osmoWriteCharUuid = '0000FFF5-0000-1000-8000-00805F9B34FB';
+  static const String osmoNotifyCharUuid = '0000FFF4-0000-1000-8000-00805F9B34FB';
 
   // Scan
   static const int scanTimeoutSeconds = 15;
