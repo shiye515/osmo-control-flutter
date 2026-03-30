@@ -66,6 +66,27 @@ class BleProvider extends ChangeNotifier {
 
   Stream<List<int>>? get notifyStream => _bleService.notifyStream;
 
+  /// Current power mode (0=normal, 3=sleep).
+  int get powerMode => _bleService.powerMode;
+
+  /// Stream of power mode changes.
+  Stream<int> get powerModeStream => _bleService.powerModeStream;
+
+  /// Send sleep command to camera.
+  Future<bool> sendSleepCommand() async {
+    return _bleService.sendSleepCommand();
+  }
+
+  /// Send wake command to camera.
+  Future<bool> sendWakeCommand() async {
+    return _bleService.sendWakeCommand();
+  }
+
+  /// Generate wake-up advertisement data for a sleeping camera.
+  static List<int> getWakeUpAdvData(String macAddress) {
+    return BleService.getWakeUpAdvData(macAddress);
+  }
+
   @override
   void dispose() {
     _scanSubscription?.cancel();

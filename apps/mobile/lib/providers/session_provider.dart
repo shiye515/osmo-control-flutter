@@ -30,8 +30,11 @@ class SessionProvider extends ChangeNotifier {
   String? get lastError => _lastError;
   bool get isConnected => _connectedDevice?.isConnected ?? false;
   bool get isAuthenticated => _connectedDevice?.isAuthenticated ?? false;
+  int get powerMode => _bleProvider?.powerMode ?? 0;
+  bool get isSleeping => powerMode == 3;
 
   StreamSubscription<List<int>>? _notifySubscription;
+  StreamSubscription<int>? _powerModeSubscription;
 
   void updateBleProvider(BleProvider ble) {
     _bleProvider = ble;
@@ -78,6 +81,13 @@ class SessionProvider extends ChangeNotifier {
     _notifySubscription?.cancel();
     _notifySubscription =
         _bleProvider?.notifyStream?.listen(_handleNotification);
+
+    _powerModeSubscription?.cancel();
+    _powerModeSubscription =
+        _bleProvider?.powerModeStream.listen((mode) {
+          _log.info('Power mode changed: $mode (${mode == 3 ? "sleep" : "normal"})');
+          notifyListeners();
+        });
   }
 
   void _handleNotification(List<int> data) {
@@ -154,22 +164,32 @@ class SessionProvider extends ChangeNotifier {
 
   Future<void> sleep() async {
     if (!isConnected && !_isFakeMode) return;
-    final cmd = ProtocolCodec.buildSleep();
     if (_isFakeMode) {
       _addLog(LogDirection.system, '[Fake] Sleep');
       return;
     }
-    await sendRawCommand(cmd);
+    _log.info('=== Sending sleep command ===');
+    final success = await _bleProvider?.sendSleepCommand() ?? false;
+    if (success) {
+      _addLog(LogDirection.system, 'Sleep command sent');
+    } else {
+      _addLog(LogDirection.system, 'Failed to send sleep command');
+    }
   }
 
   Future<void> wake() async {
     if (!isConnected && !_isFakeMode) return;
-    final cmd = ProtocolCodec.buildWake();
     if (_isFakeMode) {
       _addLog(LogDirection.system, '[Fake] Wake');
       return;
     }
-    await sendRawCommand(cmd);
+    _log.info('=== Sending wake command ===');
+    final success = await _bleProvider?.sendWakeCommand() ?? false;
+    if (success) {
+      _addLog(LogDirection.system, 'Wake command sent');
+    } else {
+      _addLog(LogDirection.system, 'Failed to send wake command');
+    }
   }
 
   Future<void> requestVersion() async {
@@ -200,6 +220,7 @@ class SessionProvider extends ChangeNotifier {
     await _bleProvider?.disconnect();
     _connectedDevice = null;
     _notifySubscription?.cancel();
+    _powerModeSubscription?.cancel();
     _addLog(LogDirection.system, 'Disconnected');
     notifyListeners();
   }

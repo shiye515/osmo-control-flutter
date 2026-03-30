@@ -191,6 +191,40 @@ class DjiRProtocol {
     );
   }
 
+  /// Build power mode command (CmdSet=0x00, CmdID=0x1A).
+  /// powerMode: 0=normal, 3=sleep
+  static List<int> buildPowerModeCommand({required int powerMode}) {
+    return buildFrame(cmdSet: 0x00, cmdId: 0x1A, payload: [powerMode]);
+  }
+
+  /// Build sleep command (powerMode=3).
+  static List<int> buildSleepCommand() {
+    return buildPowerModeCommand(powerMode: 3);
+  }
+
+  /// Build wake command (powerMode=0).
+  static List<int> buildWakeCommand() {
+    return buildPowerModeCommand(powerMode: 0);
+  }
+
+  /// Generate wake-up advertisement data for a sleeping camera.
+  /// Format: [10, 0xFF, 'W','K','P', MAC(reversed)]
+  static List<int> buildWakeUpAdvData(String macAddress) {
+    final macBytes = macAddress
+        .split(':')
+        .map((s) => int.parse(s, radix: 16))
+        .toList();
+
+    return [
+      10,
+      0xFF,
+      0x57, // 'W'
+      0x4B, // 'K'
+      0x50, // 'P'
+      ...macBytes.reversed,
+    ];
+  }
+
   /// Parse connection request/response payload.
   static ConnectionPayload? parseConnectionPayload(List<int> payload) {
     if (payload.length < 33) return null;

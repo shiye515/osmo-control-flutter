@@ -296,20 +296,34 @@ class _QuickActionsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSleeping = session.isSleeping;
+    final isConnected = session.isConnected;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('快捷操作',
-                style: Theme.of(context).textTheme.titleSmall),
+            Row(
+              children: [
+                Text('快捷操作',
+                    style: Theme.of(context).textTheme.titleSmall),
+                const Spacer(),
+                if (isSleeping)
+                  Chip(
+                    avatar: const Icon(Icons.bedtime, size: 16, color: Colors.orange),
+                    label: const Text('休眠中', style: TextStyle(color: Colors.orange)),
+                    backgroundColor: Colors.orange.withValues(alpha: 0.1),
+                  ),
+              ],
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => session.sleep(),
+                    onPressed: isConnected && !isSleeping ? () => _onSleep(context, session) : null,
                     icon: const Icon(Icons.bedtime_outlined),
                     label: const Text('休眠'),
                   ),
@@ -317,7 +331,7 @@ class _QuickActionsCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => session.wake(),
+                    onPressed: isConnected ? () => _onWake(context, session) : null,
                     icon: const Icon(Icons.wb_sunny_outlined),
                     label: const Text('唤醒'),
                   ),
@@ -336,5 +350,29 @@ class _QuickActionsCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _onSleep(BuildContext context, SessionProvider session) async {
+    await session.sleep();
+    if (context.mounted) {
+      toastification.show(
+        context: context,
+        title: const Text('已发送休眠命令'),
+        type: ToastificationType.success,
+        autoCloseDuration: const Duration(seconds: 2),
+      );
+    }
+  }
+
+  void _onWake(BuildContext context, SessionProvider session) async {
+    await session.wake();
+    if (context.mounted) {
+      toastification.show(
+        context: context,
+        title: const Text('已发送唤醒命令'),
+        type: ToastificationType.success,
+        autoCloseDuration: const Duration(seconds: 2),
+      );
+    }
   }
 }
