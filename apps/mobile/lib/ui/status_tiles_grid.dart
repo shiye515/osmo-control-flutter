@@ -1,22 +1,31 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../config/camera_modes.dart';
 import '../models/camera_status_model.dart';
 import 'status_tile.dart';
 
 /// Grid of status tiles displaying all available camera status.
+/// Includes a 2x2 mode selector tile.
 class StatusTilesGrid extends StatelessWidget {
   final CameraStatusModel status;
   final bool isConnected;
   final String? deviceName;
+  final int deviceId;
   final VoidCallback? onDisconnect;
-  final VoidCallback? onRecordControl;  // Toggle recording or take photo
+  final VoidCallback? onRecordControl;
+  final void Function(int mode)? onModeSelected;
 
   const StatusTilesGrid({
     super.key,
     required this.status,
     required this.isConnected,
+    required this.deviceId,
     this.deviceName,
     this.onDisconnect,
     this.onRecordControl,
+    this.onModeSelected,
   });
 
   @override
@@ -26,11 +35,11 @@ class StatusTilesGrid extends StatelessWidget {
     }
 
     final theme = Theme.of(context);
-    final tiles = _buildTiles(theme);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Remaining small tiles in 4-column grid
         GridView.count(
           crossAxisCount: 4,
           shrinkWrap: true,
@@ -38,24 +47,57 @@ class StatusTilesGrid extends StatelessWidget {
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
           childAspectRatio: 1.0,
-          children: tiles,
+          children: _buildSmallTiles(theme),
+        ),
+        const SizedBox(height: 8),
+        // First row: Mode selector (2x2) + 2 small tiles
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 2x2 Mode selector tile
+            Expanded(
+              flex: 2,
+              child: AspectRatio(
+                aspectRatio: 1.0,
+                child: _ModeSelectorTile(
+                  currentMode: status.cameraMode,
+                  deviceId: deviceId,
+                  onModeSelected: onModeSelected,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Right side: 2 small tiles stacked
+            Expanded(
+              flex: 2,
+              child: Column(
+                children: [
+                  AspectRatio(
+                    aspectRatio: 1.0,
+                    child: _RecordControlTile(
+                      isRecording: status.isRecording,
+                      cameraMode: status.cameraMode,
+                      onTap: onRecordControl,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
-  List<Widget> _buildTiles(ThemeData theme) {
+  List<Widget> _buildSmallTiles(ThemeData theme) {
     return [
-      // Record control tile (first position)
-      _RecordControlTile(
-        isRecording: status.isRecording,
-        cameraMode: status.cameraMode,
-        onTap: onRecordControl,
-      ),
-      // Connection status (clickable to disconnect)
-      _ConnectionTile(
-        deviceName: deviceName ?? 'Osmo',
-        onDisconnect: onDisconnect,
+      AspectRatio(
+        aspectRatio: 1.0,
+        child: _ConnectionTile(
+          deviceName: deviceName ?? 'Osmo',
+          onDisconnect: onDisconnect,
+        ),
       ),
       // Battery
       StatusTile(
@@ -80,12 +122,6 @@ class StatusTilesGrid extends StatelessWidget {
         icon: Icons.timer_outlined,
         label: '剩余',
         value: status.remainTimeDisplay,
-      ),
-      // Camera mode
-      StatusTile(
-        icon: _getModeIcon(status.cameraMode),
-        label: '模式',
-        value: status.cameraModeDisplay,
       ),
       // Resolution + FPS
       StatusTile(
@@ -131,27 +167,6 @@ class StatusTilesGrid extends StatelessWidget {
     ];
   }
 
-  IconData _getModeIcon(int mode) {
-    switch (mode) {
-      case 0x00:
-        return Icons.slow_motion_video;
-      case 0x01:
-        return Icons.videocam;
-      case 0x02:
-        return Icons.timelapse;
-      case 0x05:
-        return Icons.camera_alt;
-      case 0x0A:
-        return Icons.motion_photos_on;
-      case 0x28:
-        return Icons.nights_stay;
-      case 0x34:
-        return Icons.person_pin;
-      default:
-        return Icons.videocam;
-    }
-  }
-
   IconData _getStatusIcon(int cameraStatus) {
     switch (cameraStatus) {
       case 0:
@@ -167,6 +182,183 @@ class StatusTilesGrid extends StatelessWidget {
       default:
         return Icons.power;
     }
+  }
+}
+
+/// 2x2 Mode selector tile with scroll wheel.
+class _ModeSelectorTile extends StatefulWidget {
+  final int currentMode;
+  final int deviceId;
+  final void Function(int mode)? onModeSelected;
+
+  const _ModeSelectorTile({
+    required this.currentMode,
+    required this.deviceId,
+    this.onModeSelected,
+  });
+
+  @override
+  State<_ModeSelectorTile> createState() => _ModeSelectorTileState();
+}
+
+class _ModeSelectorTileState extends State<_ModeSelectorTile> {
+  late FixedExtentScrollController _scrollController;
+  Timer? _debounceTimer;
+  int _selectedIndex = 0;
+  bool _isUserScrolling = false;
+
+  List<CameraModeDef> get _supportedModes => getSupportedModes(widget.deviceId);
+
+  int _findModeIndex(int mode) {
+    for (int i = 0; i < _supportedModes.length; i++) {
+      if (_supportedModes[i].mode == mode) return i;
+    }
+    return 0;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = _findModeIndex(widget.currentMode);
+    _scrollController =
+        FixedExtentScrollController(initialItem: _selectedIndex);
+  }
+
+  @override
+  void didUpdateWidget(_ModeSelectorTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentMode != widget.currentMode && !_isUserScrolling) {
+      final newIndex = _findModeIndex(widget.currentMode);
+      if (newIndex != _selectedIndex) {
+        _selectedIndex = newIndex;
+        _scrollController.animateToItem(
+          newIndex,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    }
+    if (oldWidget.deviceId != widget.deviceId) {
+      _selectedIndex = _findModeIndex(widget.currentMode);
+      _scrollController.dispose();
+      _scrollController =
+          FixedExtentScrollController(initialItem: _selectedIndex);
+    }
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScrollStart() {
+    _isUserScrolling = true;
+    _debounceTimer?.cancel();
+  }
+
+  void _onScrollEnd() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      _isUserScrolling = false;
+      if (_selectedIndex < _supportedModes.length) {
+        final selectedMode = _supportedModes[_selectedIndex].mode;
+        if (selectedMode != widget.currentMode) {
+          HapticFeedback.mediumImpact();
+          widget.onModeSelected?.call(selectedMode);
+        }
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Stack(
+        children: [
+          // Center indicator
+          Center(
+            child: Container(
+              height: 44,
+              margin: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                color:
+                    theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          // Scroll wheel
+          NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              if (notification is ScrollStartNotification) {
+                _onScrollStart();
+              } else if (notification is ScrollEndNotification) {
+                _onScrollEnd();
+              }
+              return false;
+            },
+            child: ListWheelScrollView.useDelegate(
+              controller: _scrollController,
+              itemExtent: 44,
+              diameterRatio: 1.2,
+              perspective: 0.005,
+              physics: const FixedExtentScrollPhysics(),
+              onSelectedItemChanged: (index) {
+                _selectedIndex = index;
+              },
+              childDelegate: ListWheelChildBuilderDelegate(
+                childCount: _supportedModes.length,
+                builder: (context, index) {
+                  final mode = _supportedModes[index];
+                  final isSelected = index == _selectedIndex;
+
+                  return Center(
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 150),
+                      opacity: isSelected ? 1.0 : 0.4,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            mode.icon,
+                            size: 20,
+                            color: isSelected
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurface,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            mode.name,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                              color: isSelected
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -202,7 +394,6 @@ class _ConnectionTile extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              // '已连接',
               deviceName,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.bold,
@@ -232,14 +423,11 @@ class _RecordControlTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Determine action based on camera state
     final isPhotoMode = cameraMode == 0x05;
     final iconData = isRecording
         ? Icons.stop_circle
         : (isPhotoMode ? Icons.camera_alt : Icons.fiber_manual_record);
-    final label = isRecording
-        ? '停止'
-        : (isPhotoMode ? '拍照' : '录制');
+    final label = isRecording ? '停止' : (isPhotoMode ? '拍照' : '录制');
 
     return InkWell(
       onTap: onTap,

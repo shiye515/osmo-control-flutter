@@ -36,6 +36,7 @@ dependencies:
   photo_view: ^0.15.0
   flutter_image_compress: ^2.4.0
   flutter_blue_plus: ^2.2.1
+  geolocator: ^13.0.2
 
 dev_dependencies:
   flutter_test:

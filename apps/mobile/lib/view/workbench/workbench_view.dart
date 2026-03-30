@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../providers/session_provider.dart';
-import '../../ui/mode_scroll_selector.dart';
 import '../../ui/status_tiles_grid.dart';
 
 class WorkbenchView extends StatelessWidget {
@@ -30,29 +29,18 @@ class WorkbenchView extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Status tiles grid (top of workbench)
+            // Status tiles grid with integrated mode selector
             StatusTilesGrid(
               status: status,
               isConnected: device.isAuthenticated,
               deviceName: device.deviceName,
+              deviceId: session.cameraDeviceId,
               onDisconnect: () {
                 session.disconnect();
                 context.go('/scan');
               },
               onRecordControl: () => _onRecordControl(session),
-            ),
-            const SizedBox(height: 16),
-
-            // Mode selector
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: ModeScrollSelector(
-                  currentMode: status.cameraMode,
-                  deviceId: session.cameraDeviceId,
-                  onModeSelected: (mode) => session.switchMode(mode),
-                ),
-              ),
+              onModeSelected: (mode) => session.switchMode(mode),
             ),
           ],
         ),
