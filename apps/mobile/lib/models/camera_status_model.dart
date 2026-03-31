@@ -243,6 +243,20 @@ class CameraStatusModel {
     }
   }
 
+  /// EIS mode display name
+  String get eisModeDisplay {
+    // Mapping from DJI R SDK protocol documentation
+    // 0: OFF, 1: RS (RockSteady), 2: HS (HorizonSteady), 3: RS+, 4: HB (HorizonBalancing)
+    switch (eisMode) {
+      case 0: return 'OFF';
+      case 1: return 'RS';
+      case 2: return 'HS';
+      case 3: return 'RS+';
+      case 4: return 'HB';
+      default: return 'OFF';
+    }
+  }
+
   /// Temperature status
   bool get isOverheating => tempOver > 0;
 

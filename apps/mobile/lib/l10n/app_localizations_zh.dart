@@ -209,6 +209,27 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get gpsAcquiring => '获取中';
+
+  @override
+  String get resolution => '分辨率';
+
+  @override
+  String get frameRate => '帧率';
+
+  @override
+  String get eisMode => '增稳';
+
+  @override
+  String get pushInterval => '推送间隔';
+
+  @override
+  String get interval2s => '2秒';
+
+  @override
+  String get interval5s => '5秒';
+
+  @override
+  String get interval10s => '10秒';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -416,4 +437,25 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get gpsAcquiring => '取得中';
+
+  @override
+  String get resolution => '解析度';
+
+  @override
+  String get frameRate => '幀率';
+
+  @override
+  String get eisMode => '增穩';
+
+  @override
+  String get pushInterval => '推送間隔';
+
+  @override
+  String get interval2s => '2秒';
+
+  @override
+  String get interval5s => '5秒';
+
+  @override
+  String get interval10s => '10秒';
 }

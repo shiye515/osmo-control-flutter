@@ -273,5 +273,33 @@
   "gpsAcquiring": "Acquiring",
   "@gpsAcquiring": {
     "description": "GPS acquiring status"
+  },
+  "resolution": "Resolution",
+  "@resolution": {
+    "description": "Resolution tile label"
+  },
+  "frameRate": "FPS",
+  "@frameRate": {
+    "description": "Frame rate tile label"
+  },
+  "eisMode": "EIS",
+  "@eisMode": {
+    "description": "EIS mode tile label"
+  },
+  "pushInterval": "Push Interval",
+  "@pushInterval": {
+    "description": "Push interval label"
+  },
+  "interval2s": "2s",
+  "@interval2s": {
+    "description": "2 seconds interval option"
+  },
+  "interval5s": "5s",
+  "@interval5s": {
+    "description": "5 seconds interval option"
+  },
+  "interval10s": "10s",
+  "@interval10s": {
+    "description": "10 seconds interval option"
   }
 }

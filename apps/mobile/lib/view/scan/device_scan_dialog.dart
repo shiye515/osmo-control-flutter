@@ -71,9 +71,9 @@ class _DeviceScanDialogState extends State<DeviceScanDialog> {
     }
 
     return DraggableScrollableSheet(
-      initialChildSize: 0.7,
+      initialChildSize: 0.6,
       minChildSize: 0.5,
-      maxChildSize: 0.95,
+      maxChildSize: 0.6,
       expand: false,
       builder: (context, scrollController) {
         return Column(
@@ -83,7 +83,8 @@ class _DeviceScanDialogState extends State<DeviceScanDialog> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: Row(
                 children: [
@@ -122,16 +123,21 @@ class _DeviceScanDialogState extends State<DeviceScanDialog> {
                 child: Column(
                   children: [
                     if (!ble.isAvailable) _BleUnavailableBanner(l10n: l10n),
-                    if (session.rememberedDevice != null && !_autoConnectAttempted)
-                      _AutoConnectBanner(deviceName: session.rememberedDevice!.name, l10n: l10n),
+                    if (session.rememberedDevice != null &&
+                        !_autoConnectAttempted)
+                      _AutoConnectBanner(
+                          deviceName: session.rememberedDevice!.name,
+                          l10n: l10n),
                     if (ble.scanResults.isEmpty)
                       _EmptyState(isScanning: ble.isScanning, l10n: l10n)
                     else
                       ...ble.scanResults.map((result) {
-                        final isRemembered = session.rememberedDevice?.id == result.deviceId;
+                        final isRemembered =
+                            session.rememberedDevice?.id == result.deviceId;
                         return _DeviceTile(
                           result: result,
-                          isConnecting: _connecting && _connectingId == result.deviceId,
+                          isConnecting:
+                              _connecting && _connectingId == result.deviceId,
                           isRemembered: isRemembered,
                           onConnect: () => _onConnect(result, session, l10n),
                           l10n: l10n,
@@ -147,8 +153,8 @@ class _DeviceScanDialogState extends State<DeviceScanDialog> {
     );
   }
 
-  Future<void> _onConnect(
-      ScanResultModel result, SessionProvider session, AppLocalizations l10n) async {
+  Future<void> _onConnect(ScanResultModel result, SessionProvider session,
+      AppLocalizations l10n) async {
     setState(() {
       _connecting = true;
       _connectingId = result.deviceId;
@@ -169,7 +175,8 @@ class _DeviceScanDialogState extends State<DeviceScanDialog> {
     }
   }
 
-  void _tryAutoConnect(SessionProvider session, List<ScanResultModel> results, AppLocalizations l10n) {
+  void _tryAutoConnect(SessionProvider session, List<ScanResultModel> results,
+      AppLocalizations l10n) {
     if (_autoConnectAttempted || _connecting) return;
 
     final remembered = session.rememberedDevice;
@@ -250,7 +257,8 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.bluetooth_searching, size: 64, color: Colors.grey.shade400),
+          Icon(Icons.bluetooth_searching,
+              size: 64, color: Colors.grey.shade400),
           const SizedBox(height: 16),
           Text(
             isScanning ? l10n.scanningDevices : l10n.noDevicesFound,

@@ -496,6 +496,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Acquiring'**
   String get gpsAcquiring;
+
+  /// Resolution tile label
+  ///
+  /// In en, this message translates to:
+  /// **'Resolution'**
+  String get resolution;
+
+  /// Frame rate tile label
+  ///
+  /// In en, this message translates to:
+  /// **'FPS'**
+  String get frameRate;
+
+  /// EIS mode tile label
+  ///
+  /// In en, this message translates to:
+  /// **'EIS'**
+  String get eisMode;
+
+  /// Push interval label
+  ///
+  /// In en, this message translates to:
+  /// **'Push Interval'**
+  String get pushInterval;
+
+  /// 2 seconds interval option
+  ///
+  /// In en, this message translates to:
+  /// **'2s'**
+  String get interval2s;
+
+  /// 5 seconds interval option
+  ///
+  /// In en, this message translates to:
+  /// **'5s'**
+  String get interval5s;
+
+  /// 10 seconds interval option
+  ///
+  /// In en, this message translates to:
+  /// **'10s'**
+  String get interval10s;
 }
 
 class _AppLocalizationsDelegate

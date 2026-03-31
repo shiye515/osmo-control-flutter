@@ -65,5 +65,12 @@
   "photo": "拍照",
   "record": "錄製",
   "gpsNotEnabled": "未啟用",
-  "gpsAcquiring": "取得中"
+  "gpsAcquiring": "取得中",
+  "resolution": "解析度",
+  "frameRate": "幀率",
+  "eisMode": "增穩",
+  "pushInterval": "推送間隔",
+  "interval2s": "2秒",
+  "interval5s": "5秒",
+  "interval10s": "10秒"
 }

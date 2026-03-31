@@ -213,4 +213,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gpsAcquiring => 'Acquiring';
+
+  @override
+  String get resolution => 'Resolution';
+
+  @override
+  String get frameRate => 'FPS';
+
+  @override
+  String get eisMode => 'EIS';
+
+  @override
+  String get pushInterval => 'Push Interval';
+
+  @override
+  String get interval2s => '2s';
+
+  @override
+  String get interval5s => '5s';
+
+  @override
+  String get interval10s => '10s';
 }

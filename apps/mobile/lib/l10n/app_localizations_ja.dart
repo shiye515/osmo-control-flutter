@@ -209,4 +209,25 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get gpsAcquiring => '取得中';
+
+  @override
+  String get resolution => '解像度';
+
+  @override
+  String get frameRate => 'fps';
+
+  @override
+  String get eisMode => '手ブレ';
+
+  @override
+  String get pushInterval => '送信間隔';
+
+  @override
+  String get interval2s => '2秒';
+
+  @override
+  String get interval5s => '5秒';
+
+  @override
+  String get interval10s => '10秒';
 }

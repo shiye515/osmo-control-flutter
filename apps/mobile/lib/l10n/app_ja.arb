@@ -65,5 +65,12 @@
   "photo": "写真",
   "record": "録画",
   "gpsNotEnabled": "無効",
-  "gpsAcquiring": "取得中"
+  "gpsAcquiring": "取得中",
+  "resolution": "解像度",
+  "frameRate": "fps",
+  "eisMode": "手ブレ",
+  "pushInterval": "送信間隔",
+  "interval2s": "2秒",
+  "interval5s": "5秒",
+  "interval10s": "10秒"
 }

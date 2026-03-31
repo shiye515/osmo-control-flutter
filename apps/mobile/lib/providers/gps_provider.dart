@@ -12,17 +12,18 @@ class GpsProvider extends ChangeNotifier {
 
   GpsPointModel? _lastGpsPoint;
   bool _autoPushEnabled = false;
-  double _frequencyHz = 1.0;
+  int _pushIntervalSec = 2;  // Changed from Hz to seconds (2, 5, 10)
   Timer? _autoPushTimer;
 
   bool _gpsEnabled = false;
   StreamSubscription? _locationSubscription;
 
   static const _kGpsEnabledKey = 'gps_enabled';
+  static const _kPushIntervalKey = 'push_interval_sec';
 
   GpsPointModel? get lastGpsPoint => _lastGpsPoint;
   bool get autoPushEnabled => _autoPushEnabled;
-  double get frequencyHz => _frequencyHz;
+  int get pushIntervalSec => _pushIntervalSec;
   bool get gpsEnabled => _gpsEnabled;
 
   void updateSession(SessionProvider session) {
@@ -98,18 +99,23 @@ class GpsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setAutoPushEnabled(bool enabled) {
+  void setAutoPushEnabled(bool enabled) async {
     _autoPushEnabled = enabled;
     if (enabled) {
+      // Auto-start GPS when enabling auto-push
+      if (!_gpsEnabled) {
+        await setGpsEnabled(true);
+      }
       _startAutoPush();
     } else {
       _stopAutoPush();
+      // Keep GPS running for position display
     }
     notifyListeners();
   }
 
-  void setFrequencyHz(double hz) {
-    _frequencyHz = hz;
+  void setPushIntervalSec(int seconds) {
+    _pushIntervalSec = seconds;
     if (_autoPushEnabled) {
       _stopAutoPush();
       _startAutoPush();
@@ -117,14 +123,23 @@ class GpsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> loadPushIntervalState() async {
+    final prefs = await SharedPreferences.getInstance();
+    _pushIntervalSec = prefs.getInt(_kPushIntervalKey) ?? 2;
+    notifyListeners();
+  }
+
+  Future<void> savePushIntervalState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_kPushIntervalKey, _pushIntervalSec);
+  }
+
   void _startAutoPush() {
     _stopAutoPush();
-    // Clamp interval between 100 ms (10 Hz) and 60 000 ms (1/60 Hz).
-    final intervalMs = (_frequencyHz > 0 ? (1000 / _frequencyHz) : 1000)
-        .round()
-        .clamp(100, 60000);
+    // Use seconds interval (2, 5, or 10 seconds)
+    final intervalSec = _pushIntervalSec.clamp(1, 60);
     _autoPushTimer = Timer.periodic(
-        Duration(milliseconds: intervalMs), (_) => _pushCurrentLocation());
+        Duration(seconds: intervalSec), (_) => _pushCurrentLocation());
   }
 
   void _stopAutoPush() {

@@ -131,11 +131,23 @@ class StatusTilesGrid extends StatelessWidget {
         label: l10n.remaining,
         value: status.remainTimeDisplay,
       ),
-      // Resolution + FPS
+      // Resolution
       StatusTile(
-        icon: Icons.videocam_outlined,
-        label: status.resolutionDisplay,
+        icon: Icons.high_quality_outlined,
+        label: l10n.resolution,
+        value: status.resolutionDisplay,
+      ),
+      // Frame rate
+      StatusTile(
+        icon: Icons.speed_outlined,
+        label: l10n.frameRate,
         value: status.fpsDisplay,
+      ),
+      // EIS mode
+      StatusTile(
+        icon: Icons.gps_fixed,
+        label: l10n.eisMode,
+        value: status.eisModeDisplay,
       ),
       // Recording time
       StatusTile(
