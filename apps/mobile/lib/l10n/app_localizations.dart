@@ -538,6 +538,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'10s'**
   String get interval10s;
+
+  /// Device disconnected status
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnected'**
+  String get disconnected;
 }
 
 class _AppLocalizationsDelegate

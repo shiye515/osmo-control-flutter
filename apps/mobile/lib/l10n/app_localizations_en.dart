@@ -234,4 +234,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get interval10s => '10s';
+
+  @override
+  String get disconnected => 'Disconnected';
 }

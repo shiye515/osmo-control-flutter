@@ -72,5 +72,6 @@
   "pushInterval": "推送间隔",
   "interval2s": "2秒",
   "interval5s": "5秒",
-  "interval10s": "10秒"
+  "interval10s": "10秒",
+  "disconnected": "未连接"
 }

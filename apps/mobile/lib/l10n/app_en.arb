@@ -301,5 +301,9 @@
   "interval10s": "10s",
   "@interval10s": {
     "description": "10 seconds interval option"
+  },
+  "disconnected": "Disconnected",
+  "@disconnected": {
+    "description": "Device disconnected status"
   }
 }

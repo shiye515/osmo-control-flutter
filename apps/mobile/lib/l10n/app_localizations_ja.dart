@@ -230,4 +230,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get interval10s => '10秒';
+
+  @override
+  String get disconnected => '未接続';
 }

@@ -36,10 +36,6 @@ class StatusTilesGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!isConnected) {
-      return const SizedBox.shrink();
-    }
-
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
@@ -69,6 +65,7 @@ class StatusTilesGrid extends StatelessWidget {
                 child: _ModeSelectorTile(
                   currentMode: status.cameraMode,
                   deviceId: deviceId,
+                  enabled: isConnected,
                   onModeSelected: onModeSelected,
                 ),
               ),
@@ -84,6 +81,7 @@ class StatusTilesGrid extends StatelessWidget {
                     child: _RecordControlTile(
                       isRecording: status.isRecording,
                       cameraMode: status.cameraMode,
+                      enabled: isConnected,
                       onTap: onRecordControl,
                       l10n: l10n,
                     ),
@@ -99,20 +97,24 @@ class StatusTilesGrid extends StatelessWidget {
   }
 
   List<Widget> _buildSmallTiles(ThemeData theme, AppLocalizations l10n) {
+    final placeholder = '--';
+
     return [
       AspectRatio(
         aspectRatio: 1.0,
         child: _ConnectionTile(
+          isConnected: isConnected,
           deviceName: deviceName ?? 'Osmo',
           onTap: onShowScanDialog,
+          l10n: l10n,
         ),
       ),
       // Battery
       StatusTile(
         icon: Icons.battery_5_bar_rounded,
         label: l10n.battery,
-        value: status.batteryDisplay,
-        iconColor: status.batteryPercent < 20
+        value: isConnected ? status.batteryDisplay : placeholder,
+        iconColor: isConnected && status.batteryPercent < 20
             ? theme.colorScheme.error
             : theme.colorScheme.primary,
       ),
@@ -120,8 +122,8 @@ class StatusTilesGrid extends StatelessWidget {
       StatusTile(
         icon: Icons.sd_card_outlined,
         label: l10n.storage,
-        value: status.storageDisplay,
-        iconColor: status.remainCapacityMB < 1024
+        value: isConnected ? status.storageDisplay : placeholder,
+        iconColor: isConnected && status.remainCapacityMB < 1024
             ? theme.colorScheme.error
             : theme.colorScheme.primary,
       ),
@@ -129,32 +131,32 @@ class StatusTilesGrid extends StatelessWidget {
       StatusTile(
         icon: Icons.timer_outlined,
         label: l10n.remaining,
-        value: status.remainTimeDisplay,
+        value: isConnected ? status.remainTimeDisplay : placeholder,
       ),
       // Resolution
       StatusTile(
         icon: Icons.high_quality_outlined,
         label: l10n.resolution,
-        value: status.resolutionDisplay,
+        value: isConnected ? status.resolutionDisplay : placeholder,
       ),
       // Frame rate
       StatusTile(
         icon: Icons.speed_outlined,
         label: l10n.frameRate,
-        value: status.fpsDisplay,
+        value: isConnected ? status.fpsDisplay : placeholder,
       ),
       // EIS mode
       StatusTile(
         icon: Icons.gps_fixed,
         label: l10n.eisMode,
-        value: status.eisModeDisplay,
+        value: isConnected ? status.eisModeDisplay : placeholder,
       ),
       // Recording time
       StatusTile(
         icon: Icons.timer_sharp,
         label: l10n.recording,
-        value: status.recordTimeDisplay,
-        iconColor: status.isRecording
+        value: isConnected ? status.recordTimeDisplay : '--:--:--',
+        iconColor: isConnected && status.isRecording
             ? theme.colorScheme.error
             : theme.colorScheme.onSurfaceVariant,
       ),
@@ -162,22 +164,22 @@ class StatusTilesGrid extends StatelessWidget {
       StatusTile(
         icon: Icons.device_thermostat_outlined,
         label: l10n.temperature,
-        value: status.isOverheating ? l10n.overheating : l10n.normal,
-        iconColor: status.isOverheating
+        value: isConnected ? (status.isOverheating ? l10n.overheating : l10n.normal) : placeholder,
+        iconColor: isConnected && status.isOverheating
             ? theme.colorScheme.error
             : theme.colorScheme.primary,
       ),
       // Camera status
       StatusTile(
-        icon: _getStatusIcon(status.cameraStatus),
+        icon: _getStatusIcon(isConnected ? status.cameraStatus : 0),
         label: l10n.status,
-        value: status.cameraStatusDisplay,
-        iconColor: status.isRecording
+        value: isConnected ? status.cameraStatusDisplay : placeholder,
+        iconColor: isConnected && status.isRecording
             ? theme.colorScheme.error
             : theme.colorScheme.primary,
       ),
       // Power mode (sleep indicator)
-      if (status.isSleeping)
+      if (isConnected && status.isSleeping)
         StatusTile(
           icon: Icons.bedtime,
           label: l10n.power,
@@ -215,11 +217,13 @@ class StatusTilesGrid extends StatelessWidget {
 class _ModeSelectorTile extends StatefulWidget {
   final int currentMode;
   final int deviceId;
+  final bool enabled;
   final void Function(int mode)? onModeSelected;
 
   const _ModeSelectorTile({
     required this.currentMode,
     required this.deviceId,
+    this.enabled = true,
     this.onModeSelected,
   });
 
@@ -321,9 +325,10 @@ class _ModeSelectorTileState extends State<_ModeSelectorTile> {
               ),
             ),
           ),
-          // Scroll wheel
+          // Scroll wheel (disabled when not connected)
           NotificationListener<ScrollNotification>(
             onNotification: (notification) {
+              if (!widget.enabled) return false;
               if (notification is ScrollStartNotification) {
                 _onScrollStart();
               } else if (notification is ScrollEndNotification) {
@@ -336,7 +341,9 @@ class _ModeSelectorTileState extends State<_ModeSelectorTile> {
               itemExtent: 44,
               diameterRatio: 1.2,
               perspective: 0.005,
-              physics: const FixedExtentScrollPhysics(),
+              physics: widget.enabled
+                  ? const FixedExtentScrollPhysics()
+                  : const NeverScrollableScrollPhysics(),
               onSelectedItemChanged: (index) {
                 _selectedIndex = index;
               },
@@ -390,17 +397,29 @@ class _ModeSelectorTileState extends State<_ModeSelectorTile> {
 
 /// Connection status tile - tap to show scan dialog.
 class _ConnectionTile extends StatelessWidget {
+  final bool isConnected;
   final String deviceName;
   final VoidCallback? onTap;
+  final AppLocalizations l10n;
 
   const _ConnectionTile({
+    required this.isConnected,
     required this.deviceName,
     this.onTap,
+    required this.l10n,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    final iconData = isConnected
+        ? Icons.bluetooth_connected
+        : Icons.bluetooth_disabled;
+    final label = isConnected ? deviceName : l10n.disconnected;
+    final iconColor = isConnected
+        ? theme.colorScheme.primary
+        : theme.colorScheme.onSurfaceVariant;
 
     return InkWell(
       onTap: onTap,
@@ -414,13 +433,13 @@ class _ConnectionTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.bluetooth_connected,
+              iconData,
               size: 24,
-              color: theme.colorScheme.primary,
+              color: iconColor,
             ),
             const SizedBox(height: 4),
             Text(
-              deviceName,
+              label,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -437,12 +456,14 @@ class _ConnectionTile extends StatelessWidget {
 class _RecordControlTile extends StatelessWidget {
   final bool isRecording;
   final int cameraMode;
+  final bool enabled;
   final VoidCallback? onTap;
   final AppLocalizations l10n;
 
   const _RecordControlTile({
     required this.isRecording,
     required this.cameraMode,
+    this.enabled = true,
     this.onTap,
     required this.l10n,
   });
@@ -457,14 +478,23 @@ class _RecordControlTile extends StatelessWidget {
         : (isPhotoMode ? Icons.camera_alt : Icons.fiber_manual_record);
     final label = isRecording ? l10n.stop : (isPhotoMode ? l10n.photo : l10n.record);
 
+    final bgColor = enabled
+        ? (isRecording
+            ? theme.colorScheme.errorContainer
+            : theme.colorScheme.primaryContainer)
+        : theme.colorScheme.surfaceContainerHighest;
+    final fgColor = enabled
+        ? (isRecording
+            ? theme.colorScheme.onErrorContainer
+            : theme.colorScheme.onPrimaryContainer)
+        : theme.colorScheme.onSurfaceVariant;
+
     return InkWell(
-      onTap: onTap,
+      onTap: enabled ? onTap : null,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         decoration: BoxDecoration(
-          color: isRecording
-              ? theme.colorScheme.errorContainer
-              : theme.colorScheme.primaryContainer,
+          color: bgColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -473,18 +503,14 @@ class _RecordControlTile extends StatelessWidget {
             Icon(
               iconData,
               size: 28,
-              color: isRecording
-                  ? theme.colorScheme.onErrorContainer
-                  : theme.colorScheme.onPrimaryContainer,
+              color: fgColor,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: isRecording
-                    ? theme.colorScheme.onErrorContainer
-                    : theme.colorScheme.onPrimaryContainer,
+                color: fgColor,
               ),
               textAlign: TextAlign.center,
             ),

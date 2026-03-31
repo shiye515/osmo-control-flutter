@@ -1,19 +1,31 @@
 ## Requirements
 
 ### Requirement: Status tile component
-The system SHALL display camera status as square tiles, 4 per row.
+The system SHALL display camera status as square tiles, 4 per row, even when no device is connected.
 
 #### Scenario: Display battery tile
 - **WHEN** camera battery is 85%
 - **THEN** tile shows battery icon with "85%" label
 
+#### Scenario: Display battery tile disconnected
+- **WHEN** no camera is connected
+- **THEN** tile shows battery icon with "--" placeholder label
+
 #### Scenario: Display storage tile
 - **WHEN** SD card has 32GB remaining
 - **THEN** tile shows storage icon with "32GB" label
 
+#### Scenario: Display storage tile disconnected
+- **WHEN** no camera is connected
+- **THEN** tile shows storage icon with "--" placeholder label
+
 #### Scenario: Display recording time tile
 - **WHEN** recording time is 5 minutes 23 seconds
 - **THEN** tile shows "00:05:23" with timer icon
+
+#### Scenario: Display recording time tile disconnected
+- **WHEN** no camera is connected
+- **THEN** tile shows "--:--:--" placeholder with timer icon
 
 #### Scenario: Display camera mode tile
 - **WHEN** camera is in video mode
@@ -23,13 +35,25 @@ The system SHALL display camera status as square tiles, 4 per row.
 - **WHEN** video_resolution is 16 (4K)
 - **THEN** tile shows video icon with "4K" label
 
+#### Scenario: Display resolution tile disconnected
+- **WHEN** no camera is connected
+- **THEN** tile shows video icon with "--" placeholder label
+
 #### Scenario: Display frame rate tile
 - **WHEN** fps_idx is 6 (60fps)
 - **THEN** tile shows speed icon with "60fps" label
 
+#### Scenario: Display frame rate tile disconnected
+- **WHEN** no camera is connected
+- **THEN** tile shows speed icon with "--" placeholder label
+
 #### Scenario: Display EIS mode tile
 - **WHEN** eis_mode is 1 (RS)
 - **THEN** tile shows stabilization icon with "RS" label
+
+#### Scenario: Display EIS mode tile disconnected
+- **WHEN** no camera is connected
+- **THEN** tile shows stabilization icon with "--" placeholder label
 
 ### Requirement: Resolution tile
 The system SHALL display camera resolution as a separate status tile.
@@ -97,6 +121,14 @@ Each status tile SHALL be square with icon and label.
 - **AND** has equal width and height
 - **AND** shows an icon at top and label at bottom
 
+### Requirement: Connection tile for disconnected state
+The system SHALL display a connection tile indicating disconnected state when no device is connected.
+
+#### Scenario: Connection tile shows disconnected
+- **WHEN** no camera is connected
+- **THEN** connection tile shows "未连接" label with Bluetooth icon
+- **AND** tapping the tile opens device scan dialog
+
 ### Requirement: Recording control tile
 系统 SHALL 提供一个智能录制控制磁贴，根据相机状态自动切换功能。
 
@@ -114,3 +146,19 @@ Each status tile SHALL be square with icon and label.
 - **WHEN** 相机处于拍照模式
 - **THEN** 磁贴显示拍照图标和"拍照"文字
 - **AND** 点击后发送拍照命令
+
+### Requirement: Record control tile disabled state
+The system SHALL disable the record control tile when no device is connected.
+
+#### Scenario: Record control tile disabled
+- **WHEN** no camera is connected
+- **THEN** record control tile shows gray/disabled appearance
+- **AND** tapping the tile has no effect
+
+### Requirement: Mode selector disabled state
+The system SHALL disable the mode selector scroll wheel when no device is connected.
+
+#### Scenario: Mode selector disabled
+- **WHEN** no camera is connected
+- **THEN** mode selector shows default mode (video)
+- **AND** scroll wheel is disabled and cannot change mode

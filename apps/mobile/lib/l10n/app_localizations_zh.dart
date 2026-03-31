@@ -230,6 +230,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get interval10s => '10秒';
+
+  @override
+  String get disconnected => '未连接';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -458,4 +461,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get interval10s => '10秒';
+
+  @override
+  String get disconnected => '未連接';
 }
