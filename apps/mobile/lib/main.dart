@@ -21,7 +21,8 @@ void _setupLogging() {
   // Only show warnings and errors in production
   Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((record) {
-    debugPrint('[${record.level.name}] ${record.loggerName}: ${record.message}');
+    debugPrint(
+        '[${record.level.name}] ${record.loggerName}: ${record.message}');
   });
 }
 
@@ -39,7 +40,9 @@ class OsmoControlApp extends StatelessWidget {
           update: (_, ble, session) => session!..updateBleProvider(ble),
         ),
         ChangeNotifierProxyProvider<SessionProvider, GpsProvider>(
-          create: (_) => GpsProvider()..setLocationService(locationService)..loadGpsEnabledState(),
+          create: (_) => GpsProvider()
+            ..setLocationService(locationService)
+            ..loadGpsEnabledState(),
           update: (_, session, gps) => gps!..updateSession(session),
         ),
         ChangeNotifierProxyProvider<SessionProvider, DebugProvider>(
@@ -51,6 +54,26 @@ class OsmoControlApp extends StatelessWidget {
         title: 'Osmo 遥控器',
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        localeResolutionCallback: (locale, supportedLocales) {
+          // Default to English
+          if (locale == null) {
+            return const Locale('en');
+          }
+          // Check if the current locale is supported
+          for (final supportedLocale in supportedLocales) {
+            if (supportedLocale.languageCode == locale.languageCode) {
+              if (supportedLocale.scriptCode == locale.scriptCode) {
+                return supportedLocale;
+              }
+              // Return matching language code (e.g., zh for zh_Hant)
+              if (supportedLocale.scriptCode == null) {
+                return supportedLocale;
+              }
+            }
+          }
+          // Fallback to English if not supported
+          return const Locale('en');
+        },
         theme: AppTheme.light(),
         darkTheme: AppTheme.dark(),
         themeMode: ThemeMode.system,
