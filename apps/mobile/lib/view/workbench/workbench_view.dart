@@ -1,13 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../providers/session_provider.dart';
 import '../../providers/gps_provider.dart';
 import '../../ui/status_tiles_grid.dart';
+import '../scan/device_scan_dialog.dart';
 
-class WorkbenchView extends StatelessWidget {
+class WorkbenchView extends StatefulWidget {
   const WorkbenchView({super.key});
+
+  @override
+  State<WorkbenchView> createState() => _WorkbenchViewState();
+}
+
+class _WorkbenchViewState extends State<WorkbenchView> {
+  bool _hasShownAutoDialog = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAutoShowDialog();
+    });
+  }
+
+  void _checkAutoShowDialog() {
+    final session = context.read<SessionProvider>();
+    final device = session.connectedDevice;
+
+    // Auto show dialog on startup if not connected
+    if ((device == null || !device.isAuthenticated) && !_hasShownAutoDialog) {
+      _hasShownAutoDialog = true;
+      _showScanDialog();
+    }
+  }
+
+  Future<void> _showScanDialog() async {
+    final connected = await showDeviceScanDialog(context);
+    if (connected) {
+      // Connection successful, dialog closed automatically
+      setState(() {
+        _hasShownAutoDialog = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,15 +51,6 @@ class WorkbenchView extends StatelessWidget {
     final gps = context.watch<GpsProvider>();
     final device = session.connectedDevice;
     final status = session.cameraStatus;
-
-    // If not connected, redirect to scan page
-    if (device == null || !device.isAuthenticated) {
-      // Use post-frame callback to avoid modifying during build
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.go('/scan');
-      });
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
 
     return Scaffold(
       body: RefreshIndicator(
@@ -34,15 +61,12 @@ class WorkbenchView extends StatelessWidget {
             // Status tiles grid with integrated mode selector
             StatusTilesGrid(
               status: status,
-              isConnected: device.isAuthenticated,
-              deviceName: device.deviceName,
+              isConnected: device != null && device.isAuthenticated,
+              deviceName: device?.deviceName,
               deviceId: session.cameraDeviceId,
               gpsEnabled: gps.gpsEnabled,
               gpsPoint: gps.lastGpsPoint,
-              onDisconnect: () {
-                session.disconnect();
-                context.go('/scan');
-              },
+              onShowScanDialog: _showScanDialog,
               onRecordControl: () => _onRecordControl(session),
               onModeSelected: (mode) => session.switchMode(mode),
             ),

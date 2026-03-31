@@ -65,17 +65,16 @@ class CameraStatusModel {
 
   /// Parse from 1D02 payload bytes.
   static CameraStatusModel fromPayload(List<int> payload) {
-    if (payload.length < 38) {
-      return const CameraStatusModel();
-    }
+    // Log payload length for debugging
+    // payload[0]=cameraMode, payload[1]=cameraStatus, payload[2]=resolution, payload[3]=fpsIdx
 
     return CameraStatusModel(
-      cameraMode: payload[0],
-      cameraStatus: payload[1],
-      videoResolution: payload[2],
-      fpsIdx: payload[3],
-      eisMode: payload[4],
-      recordTimeSec: payload[5] | (payload[6] << 8),
+      cameraMode: payload.isNotEmpty ? payload[0] : 0,
+      cameraStatus: payload.length > 1 ? payload[1] : 0,
+      videoResolution: payload.length > 2 ? payload[2] : 0,
+      fpsIdx: payload.length > 3 ? payload[3] : 0,
+      eisMode: payload.length > 4 ? payload[4] : 0,
+      recordTimeSec: payload.length > 6 ? payload[5] | (payload[6] << 8) : 0,
       photoRatio: payload.length > 8 ? payload[8] : 0,
       realTimeCountdown: payload.length > 10 ? payload[9] | (payload[10] << 8) : 0,
       timelapseInterval: payload.length > 12 ? payload[11] | (payload[12] << 8) : 0,
@@ -207,17 +206,42 @@ class CameraStatusModel {
 
   /// Resolution display name
   String get resolutionDisplay {
+    // Mapping from DJI R SDK protocol documentation
     switch (videoResolution) {
-      case 0: return '4K';
-      case 1: return '2.7K';
-      case 2: return '1080P';
-      case 3: return '720P';
-      default: return '4K';
+      case 10: return '1080P';
+      case 16: return '4K';
+      case 45: return '2.7K';
+      case 66: return '1080P 9:16';
+      case 67: return '2.7K 9:16';
+      case 95: return '2.7K 4:3';
+      case 103: return '4K 4:3';
+      case 109: return '4K 9:16';
+      // Photo ratio (Osmo Action)
+      case 4: return 'L';
+      case 3: return 'M';
+      // Photo ratio (Osmo 360)
+      case 2: return '12MP';
+      default: return videoResolution.toString();
     }
   }
 
   /// FPS display string
-  String get fpsDisplay => '${fpsIdx}fps';
+  String get fpsDisplay {
+    // Mapping from DJI R SDK protocol documentation
+    switch (fpsIdx) {
+      case 1: return '24fps';
+      case 2: return '25fps';
+      case 3: return '30fps';
+      case 4: return '48fps';
+      case 5: return '50fps';
+      case 6: return '60fps';
+      case 7: return '120fps';
+      case 8: return '240fps';
+      case 10: return '100fps';
+      case 19: return '200fps';
+      default: return '${fpsIdx}fps';
+    }
+  }
 
   /// Temperature status
   bool get isOverheating => tempOver > 0;

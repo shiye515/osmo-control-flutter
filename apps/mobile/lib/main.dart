@@ -19,7 +19,7 @@ void main() {
 
 void _setupLogging() {
   // Only show warnings and errors in production
-  Logger.root.level = Level.WARNING;
+  Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((record) {
     debugPrint(
         '[${record.level.name}] ${record.loggerName}: ${record.message}');

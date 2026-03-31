@@ -14,8 +14,8 @@ The system SHALL send status subscription command (CmdSet=0x1D, CmdID=0x05) afte
 The system SHALL parse camera status push (CmdSet=0x1D, CmdID=0x02) payload containing:
 - camera_mode: 1 byte
 - camera_status: 1 byte (0=screen off, 1=live/idle, 2=playback, 3=recording, 5=pre-recording)
-- video_resolution: 1 byte
-- fps_idx: 1 byte
+- video_resolution: 1 byte (see mapping table below)
+- fps_idx: 1 byte (see mapping table below)
 - EIS_mode: 1 byte
 - record_time: 2 bytes (seconds)
 - photo_ratio: 1 byte
@@ -25,6 +25,34 @@ The system SHALL parse camera status push (CmdSet=0x1D, CmdID=0x02) payload cont
 - power_mode: 1 byte (0=normal, 3=sleep)
 - camera_bat_percentage: 1 byte (0-100%)
 
+The system SHALL map video_resolution values:
+
+| video_resolution | Display |
+|------------------|---------|
+| 10 | 1080P |
+| 16 | 4K |
+| 45 | 2.7K |
+| 66 | 1080P 9:16 |
+| 67 | 2.7K 9:16 |
+| 95 | 2.7K 4:3 |
+| 103 | 4K 4:3 |
+| 109 | 4K 9:16 |
+
+The system SHALL map fps_idx values:
+
+| fps_idx | Frame Rate |
+|---------|------------|
+| 1 | 24fps |
+| 2 | 25fps |
+| 3 | 30fps |
+| 4 | 48fps |
+| 5 | 50fps |
+| 6 | 60fps |
+| 7 | 120fps |
+| 8 | 240fps |
+| 10 | 100fps |
+| 19 | 200fps |
+
 #### Scenario: Parse recording status
 - **WHEN** receiving status push with camera_status=3
 - **THEN** system reports camera is recording
@@ -32,6 +60,18 @@ The system SHALL parse camera status push (CmdSet=0x1D, CmdID=0x02) payload cont
 #### Scenario: Parse battery level
 - **WHEN** receiving status push with camera_bat_percentage=85
 - **THEN** system displays 85% battery
+
+#### Scenario: Parse 1080P 60fps
+- **WHEN** receiving status push with video_resolution=10 and fps_idx=6
+- **THEN** system displays "1080P" and "60fps"
+
+#### Scenario: Parse 4K 30fps
+- **WHEN** receiving status push with video_resolution=16 and fps_idx=3
+- **THEN** system displays "4K" and "30fps"
+
+#### Scenario: Unknown resolution fallback
+- **WHEN** receiving status push with unknown video_resolution value
+- **THEN** system displays the raw value as string
 
 ### Requirement: Extended status parsing (1D06)
 The system SHALL parse extended status push (CmdSet=0x1D, CmdID=0x06) for camera_mode > 0x34 containing:

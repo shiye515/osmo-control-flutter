@@ -5,7 +5,6 @@ import '../view/home/home_shell.dart';
 import '../view/workbench/workbench_view.dart';
 import '../view/debug/debug_console_view.dart';
 import '../view/gps/gps_settings_view.dart';
-import '../view/scan/device_scan_view.dart';
 import '../view/settings/settings_view.dart';
 
 class AppRouter {
@@ -16,15 +15,9 @@ class AppRouter {
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/scan',
+    initialLocation: '/workbench',
     routes: [
-      // Scan page (root, no shell)
-      GoRoute(
-        path: '/scan',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const DeviceScanView(),
-      ),
-      // Shell routes (only accessible when connected)
+      // Shell routes (main app)
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) => HomeShell(child: child),

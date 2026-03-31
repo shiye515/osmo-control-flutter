@@ -276,9 +276,6 @@ class BleService {
   void _handleCameraStatusPush(DjiRFrame frame) {
     final payload = frame.payload;
 
-    // Log raw payload for debugging mode switching
-    _log.info('Status push: mode=${payload.isNotEmpty ? "0x${payload[0].toRadixString(16)}" : "N/A"}, status=${payload.length > 1 ? payload[1] : "N/A"}');
-
     final newStatus = CameraStatusModel.fromPayload(payload);
 
     // Log mode changes

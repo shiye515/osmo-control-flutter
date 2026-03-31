@@ -173,8 +173,8 @@ int calculateCrc32(List<int> data) {
 |------|------|------|------|
 | camera_mode | 0 | 1 | 相机模式 |
 | camera_status | 1 | 1 | 0=屏幕关闭，1=直播/亮屏，2=回放，3=录制中，5=预录制 |
-| video_resolution | 2 | 1 | 分辨率 |
-| fps_idx | 3 | 1 | 帧率/连拍数/慢动作倍率 |
+| video_resolution | 2 | 1 | 分辨率（见下方映射表） |
+| fps_idx | 3 | 1 | 帧率（见下方映射表） |
 | EIS_mode | 4 | 1 | 增稳模式 |
 | record_time | 5 | 2 | 录像时间（秒） |
 | photo_ratio | 8 | 1 | 图片比例 |
@@ -191,6 +191,38 @@ int calculateCrc32(List<int> data) {
 | photo_countdown_ms | 31 | 4 | 拍照倒计时（毫秒） |
 | loop_record_sends | 35 | 2 | 循环录像时长 |
 | camera_bat_percentage | 37 | 1 | 电池电量 |
+
+**video_resolution 映射表：**
+
+| 值 | 分辨率 |
+|----|--------|
+| 10 | 1080P |
+| 16 | 4K 16:9 |
+| 45 | 2.7K 16:9 |
+| 66 | 1080P 9:16 |
+| 67 | 2.7K 9:16 |
+| 95 | 2.7K 4:3 |
+| 103 | 4K 4:3 |
+| 109 | 4K 9:16 |
+| 4 (拍照) | L |
+| 3 (拍照) | M |
+
+**fps_idx 映射表：**
+
+| 值 | 帧率 |
+|----|------|
+| 1 | 24fps |
+| 2 | 25fps |
+| 3 | 30fps |
+| 4 | 48fps |
+| 5 | 50fps |
+| 6 | 60fps |
+| 7 | 120fps |
+| 8 | 240fps |
+| 10 | 100fps |
+| 19 | 200fps |
+
+注：慢动作模式下，fps_idx 表示倍率 = 帧率 / 30
 
 ### 5.6 GPS数据推送 (0x00, 0x17)
 

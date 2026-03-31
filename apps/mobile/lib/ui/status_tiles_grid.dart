@@ -17,7 +17,7 @@ class StatusTilesGrid extends StatelessWidget {
   final int deviceId;
   final bool gpsEnabled;
   final GpsPointModel? gpsPoint;
-  final VoidCallback? onDisconnect;
+  final VoidCallback? onShowScanDialog;
   final VoidCallback? onRecordControl;
   final void Function(int mode)? onModeSelected;
 
@@ -29,7 +29,7 @@ class StatusTilesGrid extends StatelessWidget {
     this.gpsEnabled = false,
     this.gpsPoint,
     this.deviceName,
-    this.onDisconnect,
+    this.onShowScanDialog,
     this.onRecordControl,
     this.onModeSelected,
   });
@@ -104,7 +104,7 @@ class StatusTilesGrid extends StatelessWidget {
         aspectRatio: 1.0,
         child: _ConnectionTile(
           deviceName: deviceName ?? 'Osmo',
-          onDisconnect: onDisconnect,
+          onTap: onShowScanDialog,
         ),
       ),
       // Battery
@@ -376,14 +376,14 @@ class _ModeSelectorTileState extends State<_ModeSelectorTile> {
   }
 }
 
-/// Connection status tile with disconnect action.
+/// Connection status tile - tap to show scan dialog.
 class _ConnectionTile extends StatelessWidget {
   final String deviceName;
-  final VoidCallback? onDisconnect;
+  final VoidCallback? onTap;
 
   const _ConnectionTile({
     required this.deviceName,
-    this.onDisconnect,
+    this.onTap,
   });
 
   @override
@@ -391,7 +391,7 @@ class _ConnectionTile extends StatelessWidget {
     final theme = Theme.of(context);
 
     return InkWell(
-      onTap: onDisconnect,
+      onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         decoration: BoxDecoration(
