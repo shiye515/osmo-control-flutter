@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../providers/gps_provider.dart';
 import '../../utils/format_utils.dart';
 
@@ -10,42 +12,87 @@ class GpsSettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gps = context.watch<GpsProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('GPS 设置')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Card(
+    return ToastificationWrapper(
+      child: Scaffold(
+        appBar: AppBar(title: Text(l10n.gpsSettings)),
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            // GPS 启用开关
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.gpsAcquisition, style: Theme.of(context).textTheme.titleSmall),
+                    const SizedBox(height: 12),
+                    SwitchListTile(
+                      title: Text(l10n.enableGps),
+                      subtitle: Text(
+                        gps.gpsEnabled
+                            ? l10n.gpsAcquiringLocation
+                            : l10n.gpsDisabled,
+                        style: TextStyle(
+                          color: gps.gpsEnabled
+                              ? Colors.green
+                              : Colors.grey,
+                        ),
+                      ),
+                      value: gps.gpsEnabled,
+                      onChanged: (value) async {
+                        final success = await gps.setGpsEnabled(value);
+                        if (!success && value && context.mounted) {
+                          // Permission denied
+                          toastification.show(
+                            context: context,
+                            title: Text(l10n.locationPermissionDenied),
+                            description: Text(l10n.allowLocationInSettings),
+                            type: ToastificationType.warning,
+                            autoCloseDuration: const Duration(seconds: 3),
+                          );
+                        }
+                      },
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // 当前位置
+            Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('当前位置', style: Theme.of(context).textTheme.titleSmall),
+                  Text(l10n.currentLocation, style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 12),
                   if (gps.lastGpsPoint != null) ...[
                     _InfoRow(
-                        label: '纬度',
+                        label: l10n.latitude,
                         value: gps.lastGpsPoint!.latitude.toStringAsFixed(6)),
                     _InfoRow(
-                        label: '经度',
+                        label: l10n.longitude,
                         value: gps.lastGpsPoint!.longitude.toStringAsFixed(6)),
                     _InfoRow(
-                        label: '海拔',
+                        label: l10n.altitude,
                         value:
                             '${gps.lastGpsPoint!.altitude.toStringAsFixed(1)} m'),
                     _InfoRow(
-                        label: '精度',
+                        label: l10n.accuracy,
                         value:
                             '${gps.lastGpsPoint!.accuracy.toStringAsFixed(1)} m'),
                     _InfoRow(
-                        label: '时间',
+                        label: l10n.time,
                         value: FormatUtils.formatTime(
                             gps.lastGpsPoint!.timestamp)),
                   ] else
-                    const Text('暂无位置数据',
-                        style: TextStyle(color: Colors.grey)),
+                    Text(l10n.noLocationData,
+                        style: const TextStyle(color: Colors.grey)),
                 ],
               ),
             ),
@@ -57,18 +104,18 @@ class GpsSettingsView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('自动推送', style: Theme.of(context).textTheme.titleSmall),
+                  Text(l10n.autoPush, style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 12),
                   SwitchListTile(
-                    title: const Text('启用 GPS 自动推送'),
-                    subtitle: const Text('自动将手机GPS位置推送到设备'),
+                    title: Text(l10n.enableGpsAutoPush),
+                    subtitle: Text(l10n.autoPushDescription),
                     value: gps.autoPushEnabled,
                     onChanged: gps.setAutoPushEnabled,
                     contentPadding: EdgeInsets.zero,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '推送频率: ${FormatUtils.formatFrequency(gps.frequencyHz)}',
+                    l10n.pushFrequency(FormatUtils.formatFrequency(gps.frequencyHz)),
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   Slider(
@@ -92,10 +139,11 @@ class GpsSettingsView extends StatelessWidget {
                     gps.pushGpsNow(p.latitude, p.longitude, p.altitude);
                   },
             icon: const Icon(Icons.send),
-            label: const Text('立即推送当前位置'),
+            label: Text(l10n.pushNow),
           ),
         ],
       ),
+    ),
     );
   }
 }

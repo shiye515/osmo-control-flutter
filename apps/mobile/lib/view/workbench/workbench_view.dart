@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../providers/session_provider.dart';
+import '../../providers/gps_provider.dart';
 import '../../ui/status_tiles_grid.dart';
 
 class WorkbenchView extends StatelessWidget {
@@ -11,6 +12,7 @@ class WorkbenchView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final session = context.watch<SessionProvider>();
+    final gps = context.watch<GpsProvider>();
     final device = session.connectedDevice;
     final status = session.cameraStatus;
 
@@ -35,6 +37,8 @@ class WorkbenchView extends StatelessWidget {
               isConnected: device.isAuthenticated,
               deviceName: device.deviceName,
               deviceId: session.cameraDeviceId,
+              gpsEnabled: gps.gpsEnabled,
+              gpsPoint: gps.lastGpsPoint,
               onDisconnect: () {
                 session.disconnect();
                 context.go('/scan');

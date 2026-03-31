@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../config/camera_modes.dart';
+import '../l10n/app_localizations.dart';
 import '../models/camera_status_model.dart';
+import '../models/gps_point_model.dart';
 import 'status_tile.dart';
 
 /// Grid of status tiles displaying all available camera status.
@@ -13,6 +15,8 @@ class StatusTilesGrid extends StatelessWidget {
   final bool isConnected;
   final String? deviceName;
   final int deviceId;
+  final bool gpsEnabled;
+  final GpsPointModel? gpsPoint;
   final VoidCallback? onDisconnect;
   final VoidCallback? onRecordControl;
   final void Function(int mode)? onModeSelected;
@@ -22,6 +26,8 @@ class StatusTilesGrid extends StatelessWidget {
     required this.status,
     required this.isConnected,
     required this.deviceId,
+    this.gpsEnabled = false,
+    this.gpsPoint,
     this.deviceName,
     this.onDisconnect,
     this.onRecordControl,
@@ -35,6 +41,7 @@ class StatusTilesGrid extends StatelessWidget {
     }
 
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -47,7 +54,7 @@ class StatusTilesGrid extends StatelessWidget {
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
           childAspectRatio: 1.0,
-          children: _buildSmallTiles(theme),
+          children: _buildSmallTiles(theme, l10n),
         ),
         const SizedBox(height: 8),
         // First row: Mode selector (2x2) + 2 small tiles
@@ -78,6 +85,7 @@ class StatusTilesGrid extends StatelessWidget {
                       isRecording: status.isRecording,
                       cameraMode: status.cameraMode,
                       onTap: onRecordControl,
+                      l10n: l10n,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -90,7 +98,7 @@ class StatusTilesGrid extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildSmallTiles(ThemeData theme) {
+  List<Widget> _buildSmallTiles(ThemeData theme, AppLocalizations l10n) {
     return [
       AspectRatio(
         aspectRatio: 1.0,
@@ -102,7 +110,7 @@ class StatusTilesGrid extends StatelessWidget {
       // Battery
       StatusTile(
         icon: Icons.battery_5_bar_rounded,
-        label: '电量',
+        label: l10n.battery,
         value: status.batteryDisplay,
         iconColor: status.batteryPercent < 20
             ? theme.colorScheme.error
@@ -111,7 +119,7 @@ class StatusTilesGrid extends StatelessWidget {
       // Storage
       StatusTile(
         icon: Icons.sd_card_outlined,
-        label: '存储',
+        label: l10n.storage,
         value: status.storageDisplay,
         iconColor: status.remainCapacityMB < 1024
             ? theme.colorScheme.error
@@ -120,7 +128,7 @@ class StatusTilesGrid extends StatelessWidget {
       // Remaining recording time
       StatusTile(
         icon: Icons.timer_outlined,
-        label: '剩余',
+        label: l10n.remaining,
         value: status.remainTimeDisplay,
       ),
       // Resolution + FPS
@@ -132,7 +140,7 @@ class StatusTilesGrid extends StatelessWidget {
       // Recording time
       StatusTile(
         icon: Icons.timer_sharp,
-        label: '录制',
+        label: l10n.recording,
         value: status.recordTimeDisplay,
         iconColor: status.isRecording
             ? theme.colorScheme.error
@@ -141,8 +149,8 @@ class StatusTilesGrid extends StatelessWidget {
       // Temperature
       StatusTile(
         icon: Icons.device_thermostat_outlined,
-        label: '温度',
-        value: status.isOverheating ? '过热' : '正常',
+        label: l10n.temperature,
+        value: status.isOverheating ? l10n.overheating : l10n.normal,
         iconColor: status.isOverheating
             ? theme.colorScheme.error
             : theme.colorScheme.primary,
@@ -150,7 +158,7 @@ class StatusTilesGrid extends StatelessWidget {
       // Camera status
       StatusTile(
         icon: _getStatusIcon(status.cameraStatus),
-        label: '状态',
+        label: l10n.status,
         value: status.cameraStatusDisplay,
         iconColor: status.isRecording
             ? theme.colorScheme.error
@@ -160,10 +168,16 @@ class StatusTilesGrid extends StatelessWidget {
       if (status.isSleeping)
         StatusTile(
           icon: Icons.bedtime,
-          label: '电源',
-          value: '休眠',
+          label: l10n.power,
+          value: l10n.sleep,
           iconColor: Colors.orange,
         ),
+      // GPS tile
+      _GpsTile(
+        enabled: gpsEnabled,
+        gpsPoint: gpsPoint,
+        l10n: l10n,
+      ),
     ];
   }
 
@@ -412,11 +426,13 @@ class _RecordControlTile extends StatelessWidget {
   final bool isRecording;
   final int cameraMode;
   final VoidCallback? onTap;
+  final AppLocalizations l10n;
 
   const _RecordControlTile({
     required this.isRecording,
     required this.cameraMode,
     this.onTap,
+    required this.l10n,
   });
 
   @override
@@ -427,7 +443,7 @@ class _RecordControlTile extends StatelessWidget {
     final iconData = isRecording
         ? Icons.stop_circle
         : (isPhotoMode ? Icons.camera_alt : Icons.fiber_manual_record);
-    final label = isRecording ? '停止' : (isPhotoMode ? '拍照' : '录制');
+    final label = isRecording ? l10n.stop : (isPhotoMode ? l10n.photo : l10n.record);
 
     return InkWell(
       onTap: onTap,
@@ -463,6 +479,53 @@ class _RecordControlTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// GPS data tile - shows GPS coordinates when enabled.
+class _GpsTile extends StatelessWidget {
+  final bool enabled;
+  final GpsPointModel? gpsPoint;
+  final AppLocalizations l10n;
+
+  const _GpsTile({
+    required this.enabled,
+    this.gpsPoint,
+    required this.l10n,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    IconData iconData;
+    String label;
+    String value;
+    Color? iconColor;
+
+    if (!enabled) {
+      iconData = Icons.location_off;
+      label = 'GPS';
+      value = l10n.gpsNotEnabled;
+      iconColor = theme.colorScheme.onSurfaceVariant;
+    } else if (gpsPoint == null) {
+      iconData = Icons.location_searching;
+      label = 'GPS';
+      value = l10n.gpsAcquiring;
+      iconColor = theme.colorScheme.primary;
+    } else {
+      iconData = Icons.location_on;
+      label = '${gpsPoint!.latitude.toStringAsFixed(4)}';
+      value = '${gpsPoint!.longitude.toStringAsFixed(4)}';
+      iconColor = theme.colorScheme.primary;
+    }
+
+    return StatusTile(
+      icon: iconData,
+      label: label,
+      value: value,
+      iconColor: iconColor,
     );
   }
 }

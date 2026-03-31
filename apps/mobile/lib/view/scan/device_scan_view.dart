@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../models/scan_result_model.dart';
 import '../../providers/ble_provider.dart';
 import '../../providers/session_provider.dart';
@@ -42,36 +43,24 @@ class _DeviceScanViewState extends State<DeviceScanView> {
     ble.startScan();
   }
 
-  void _tryAutoConnect(SessionProvider session, List<ScanResultModel> results) {
-    if (_autoConnectAttempted || _connecting) return;
-
-    final remembered = session.rememberedDevice;
-    if (remembered == null) return;
-
-    // Check if remembered device is in scan results
-    final found = results.any((r) => r.deviceId == remembered.id);
-    if (found) {
-      _autoConnectAttempted = true;
-      _onConnect(
-        results.firstWhere((r) => r.deviceId == remembered.id),
-        session,
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final ble = context.watch<BleProvider>();
     final session = context.watch<SessionProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
-    // Try auto-connect when scan results update
+    // Try auto-connect when scan results update - defer to after build
     if (ble.scanResults.isNotEmpty && !_autoConnectAttempted) {
-      _tryAutoConnect(session, ble.scanResults);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _tryAutoConnect(session, ble.scanResults, l10n);
+        }
+      });
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('扫描设备'),
+        title: Text(l10n.scanDevices),
         actions: [
           if (ble.isScanning)
             const Padding(
@@ -93,12 +82,12 @@ class _DeviceScanViewState extends State<DeviceScanView> {
       ),
       body: Column(
         children: [
-          if (!ble.isAvailable) const _BleUnavailableBanner(),
+          if (!ble.isAvailable) _BleUnavailableBanner(l10n: l10n),
           if (session.rememberedDevice != null && !_autoConnectAttempted)
-            _AutoConnectBanner(deviceName: session.rememberedDevice!.name),
+            _AutoConnectBanner(deviceName: session.rememberedDevice!.name, l10n: l10n),
           Expanded(
             child: ble.scanResults.isEmpty
-                ? _EmptyState(isScanning: ble.isScanning)
+                ? _EmptyState(isScanning: ble.isScanning, l10n: l10n)
                 : ListView.builder(
                     itemCount: ble.scanResults.length,
                     itemBuilder: (context, i) {
@@ -110,7 +99,8 @@ class _DeviceScanViewState extends State<DeviceScanView> {
                         isConnecting:
                             _connecting && _connectingId == result.deviceId,
                         isRemembered: isRemembered,
-                        onConnect: () => _onConnect(result, session),
+                        onConnect: () => _onConnect(result, session, l10n),
+                        l10n: l10n,
                       );
                     },
                   ),
@@ -121,7 +111,7 @@ class _DeviceScanViewState extends State<DeviceScanView> {
   }
 
   Future<void> _onConnect(
-      ScanResultModel result, SessionProvider session) async {
+      ScanResultModel result, SessionProvider session, AppLocalizations l10n) async {
     setState(() {
       _connecting = true;
       _connectingId = result.deviceId;
@@ -137,7 +127,25 @@ class _DeviceScanViewState extends State<DeviceScanView> {
       context.go('/workbench');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('连接失败，请重试')),
+        SnackBar(content: Text(l10n.connectionFailed)),
+      );
+    }
+  }
+
+  void _tryAutoConnect(SessionProvider session, List<ScanResultModel> results, AppLocalizations l10n) {
+    if (_autoConnectAttempted || _connecting) return;
+
+    final remembered = session.rememberedDevice;
+    if (remembered == null) return;
+
+    // Check if remembered device is in scan results
+    final found = results.any((r) => r.deviceId == remembered.id);
+    if (found) {
+      _autoConnectAttempted = true;
+      _onConnect(
+        results.firstWhere((r) => r.deviceId == remembered.id),
+        session,
+        l10n,
       );
     }
   }
@@ -145,7 +153,8 @@ class _DeviceScanViewState extends State<DeviceScanView> {
 
 class _AutoConnectBanner extends StatelessWidget {
   final String deviceName;
-  const _AutoConnectBanner({required this.deviceName});
+  final AppLocalizations l10n;
+  const _AutoConnectBanner({required this.deviceName, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +171,7 @@ class _AutoConnectBanner extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '正在寻找 $deviceName...',
+              l10n.searchingFor(deviceName),
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onPrimaryContainer,
               ),
@@ -175,17 +184,18 @@ class _AutoConnectBanner extends StatelessWidget {
 }
 
 class _BleUnavailableBanner extends StatelessWidget {
-  const _BleUnavailableBanner();
+  final AppLocalizations l10n;
+  const _BleUnavailableBanner({required this.l10n});
 
   @override
   Widget build(BuildContext context) {
     return MaterialBanner(
-      content: const Text('蓝牙未开启，请开启蓝牙后重试'),
+      content: Text(l10n.bluetoothDisabled),
       leading: const Icon(Icons.bluetooth_disabled),
       actions: [
         TextButton(
           onPressed: () {},
-          child: const Text('知道了'),
+          child: Text(l10n.gotIt),
         ),
       ],
     );
@@ -194,7 +204,8 @@ class _BleUnavailableBanner extends StatelessWidget {
 
 class _EmptyState extends StatelessWidget {
   final bool isScanning;
-  const _EmptyState({required this.isScanning});
+  final AppLocalizations l10n;
+  const _EmptyState({required this.isScanning, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +217,7 @@ class _EmptyState extends StatelessWidget {
               size: 64, color: Colors.grey.shade400),
           const SizedBox(height: 16),
           Text(
-            isScanning ? '正在扫描附近设备...' : '未发现设备',
+            isScanning ? l10n.scanningDevices : l10n.noDevicesFound,
             style: Theme.of(context)
                 .textTheme
                 .bodyLarge
@@ -223,11 +234,13 @@ class _DeviceTile extends StatelessWidget {
   final bool isConnecting;
   final bool isRemembered;
   final VoidCallback onConnect;
+  final AppLocalizations l10n;
   const _DeviceTile(
       {required this.result,
       required this.isConnecting,
       required this.isRemembered,
-      required this.onConnect});
+      required this.onConnect,
+      required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -248,7 +261,7 @@ class _DeviceTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                '曾连接',
+                l10n.previouslyConnected,
                 style: TextStyle(
                   fontSize: 12,
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -267,7 +280,7 @@ class _DeviceTile extends StatelessWidget {
             )
           : TextButton(
               onPressed: onConnect,
-              child: const Text('连接'),
+              child: Text(l10n.connect),
             ),
     );
   }

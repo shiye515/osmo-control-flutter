@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../providers/session_provider.dart';
 
 class HomeShell extends StatelessWidget {
@@ -12,6 +13,7 @@ class HomeShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final session = context.watch<SessionProvider>();
     final location = GoRouterState.of(context).matchedLocation;
+    final l10n = AppLocalizations.of(context)!;
 
     int selectedIndex = 0;
     if (location.startsWith('/debug')) selectedIndex = 1;
@@ -39,10 +41,10 @@ class HomeShell extends StatelessWidget {
           }
         },
         destinations: [
-          const NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: '工作台',
+          NavigationDestination(
+            icon: const Icon(Icons.dashboard_outlined),
+            selectedIcon: const Icon(Icons.dashboard),
+            label: l10n.navController,
           ),
           NavigationDestination(
             icon: Badge(
@@ -50,17 +52,17 @@ class HomeShell extends StatelessWidget {
               child: const Icon(Icons.bug_report_outlined),
             ),
             selectedIcon: const Icon(Icons.bug_report),
-            label: '调试台',
+            label: l10n.navDebug,
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.location_on_outlined),
-            selectedIcon: Icon(Icons.location_on),
-            label: 'GPS',
+          NavigationDestination(
+            icon: const Icon(Icons.location_on_outlined),
+            selectedIcon: const Icon(Icons.location_on),
+            label: l10n.navGps,
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: '设置',
+          NavigationDestination(
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings),
+            label: l10n.navSettings,
           ),
         ],
       ),

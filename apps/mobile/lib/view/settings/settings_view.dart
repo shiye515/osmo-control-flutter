@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../providers/session_provider.dart';
 
 class SettingsView extends StatelessWidget {
@@ -9,29 +10,30 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final session = context.watch<SessionProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('设置')),
+      appBar: AppBar(title: Text(l10n.settings)),
       body: ListView(
         children: [
-          const _SectionHeader(title: '调试'),
+          _SectionHeader(title: l10n.debugSection),
           SwitchListTile(
-            title: const Text('模拟设备模式'),
-            subtitle: const Text('无需真实硬件，使用虚拟设备进行界面演示'),
+            title: Text(l10n.simulateDeviceMode),
+            subtitle: Text(l10n.simulateDeviceModeDescription),
             secondary: const Icon(Icons.devices_other),
             value: session.isFakeMode,
             onChanged: session.enableFakeMode,
           ),
           const Divider(),
-          const _SectionHeader(title: '关于'),
-          const ListTile(
-            leading: Icon(Icons.info_outline),
-            title: Text('Osmo 遥控器'),
-            subtitle: Text('Osmo 设备 Flutter 控制端 v1.0.0'),
+          _SectionHeader(title: l10n.aboutSection),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: Text(l10n.aboutAppTitle),
+            subtitle: Text(l10n.aboutAppSubtitle),
           ),
           ListTile(
             leading: const Icon(Icons.code),
-            title: const Text('开源许可'),
+            title: Text(l10n.openSourceLicenses),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {},
           ),

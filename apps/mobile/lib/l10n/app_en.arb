@@ -1,0 +1,277 @@
+{
+  "@@locale": "en",
+  "appTitle": "Osmo Controller",
+  "@appTitle": {
+    "description": "Application title"
+  },
+  "navController": "Controller",
+  "@navController": {
+    "description": "Navigation label for controller tab"
+  },
+  "navDebug": "Debug",
+  "@navDebug": {
+    "description": "Navigation label for debug tab"
+  },
+  "navGps": "GPS",
+  "@navGps": {
+    "description": "Navigation label for GPS tab"
+  },
+  "navSettings": "Settings",
+  "@navSettings": {
+    "description": "Navigation label for settings tab"
+  },
+  "gpsSettings": "GPS Settings",
+  "@gpsSettings": {
+    "description": "GPS settings page title"
+  },
+  "gpsAcquisition": "GPS Acquisition",
+  "@gpsAcquisition": {
+    "description": "GPS acquisition section title"
+  },
+  "enableGps": "Enable GPS",
+  "@enableGps": {
+    "description": "Enable GPS switch label"
+  },
+  "gpsAcquiringLocation": "Acquiring location data",
+  "@gpsAcquiringLocation": {
+    "description": "GPS status when acquiring"
+  },
+  "gpsDisabled": "GPS acquisition is disabled",
+  "@gpsDisabled": {
+    "description": "GPS status when disabled"
+  },
+  "locationPermissionDenied": "Location permission denied",
+  "@locationPermissionDenied": {
+    "description": "Toast title for permission denied"
+  },
+  "allowLocationInSettings": "Please allow location access in system settings",
+  "@allowLocationInSettings": {
+    "description": "Toast description for permission denied"
+  },
+  "currentLocation": "Current Location",
+  "@currentLocation": {
+    "description": "Current location section title"
+  },
+  "latitude": "Latitude",
+  "@latitude": {
+    "description": "Latitude label"
+  },
+  "longitude": "Longitude",
+  "@longitude": {
+    "description": "Longitude label"
+  },
+  "altitude": "Altitude",
+  "@altitude": {
+    "description": "Altitude label"
+  },
+  "accuracy": "Accuracy",
+  "@accuracy": {
+    "description": "Accuracy label"
+  },
+  "time": "Time",
+  "@time": {
+    "description": "Time label"
+  },
+  "noLocationData": "No location data",
+  "@noLocationData": {
+    "description": "No location data placeholder"
+  },
+  "autoPush": "Auto Push",
+  "@autoPush": {
+    "description": "Auto push section title"
+  },
+  "enableGpsAutoPush": "Enable GPS Auto Push",
+  "@enableGpsAutoPush": {
+    "description": "Enable GPS auto push switch label"
+  },
+  "autoPushDescription": "Automatically push phone GPS location to device",
+  "@autoPushDescription": {
+    "description": "Auto push feature description"
+  },
+  "pushFrequency": "Push Frequency: {frequency}",
+  "@pushFrequency": {
+    "description": "Push frequency label",
+    "placeholders": {
+      "frequency": {
+        "type": "String"
+      }
+    }
+  },
+  "pushNow": "Push Current Location",
+  "@pushNow": {
+    "description": "Push current location button label"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings page title"
+  },
+  "debugSection": "Debug",
+  "@debugSection": {
+    "description": "Debug section header"
+  },
+  "simulateDeviceMode": "Simulate Device Mode",
+  "@simulateDeviceMode": {
+    "description": "Fake device mode switch label"
+  },
+  "simulateDeviceModeDescription": "Use virtual device for UI demo without real hardware",
+  "@simulateDeviceModeDescription": {
+    "description": "Fake device mode description"
+  },
+  "aboutSection": "About",
+  "@aboutSection": {
+    "description": "About section header"
+  },
+  "aboutAppTitle": "Osmo Controller",
+  "@aboutAppTitle": {
+    "description": "App title in about section"
+  },
+  "aboutAppSubtitle": "Osmo Device Flutter Controller v1.0.0",
+  "@aboutAppSubtitle": {
+    "description": "App subtitle in about section"
+  },
+  "openSourceLicenses": "Open Source Licenses",
+  "@openSourceLicenses": {
+    "description": "Open source licenses menu item"
+  },
+  "debugConsole": "Debug Console",
+  "@debugConsole": {
+    "description": "Debug console page title"
+  },
+  "clearLogs": "Clear Logs",
+  "@clearLogs": {
+    "description": "Clear logs tooltip"
+  },
+  "noLogs": "No logs",
+  "@noLogs": {
+    "description": "No logs placeholder"
+  },
+  "queryVersion": "Query Version",
+  "@queryVersion": {
+    "description": "Preset command: query version"
+  },
+  "startRecording": "Start Recording",
+  "@startRecording": {
+    "description": "Preset command: start recording"
+  },
+  "stopRecording": "Stop Recording",
+  "@stopRecording": {
+    "description": "Preset command: stop recording"
+  },
+  "switchToPhoto": "Switch to Photo",
+  "@switchToPhoto": {
+    "description": "Preset command: switch to photo mode"
+  },
+  "sleep": "Sleep",
+  "@sleep": {
+    "description": "Preset command: sleep"
+  },
+  "enterHexCommand": "Enter hex command (e.g.: 55 12 00 ...)",
+  "@enterHexCommand": {
+    "description": "Hex input hint"
+  },
+  "send": "Send",
+  "@send": {
+    "description": "Send button label"
+  },
+  "copiedToClipboard": "Copied to clipboard",
+  "@copiedToClipboard": {
+    "description": "Copy confirmation snackbar"
+  },
+  "scanDevices": "Scan Devices",
+  "@scanDevices": {
+    "description": "Scan devices page title"
+  },
+  "searchingFor": "Searching for {deviceName}...",
+  "@searchingFor": {
+    "description": "Auto-connect banner text",
+    "placeholders": {
+      "deviceName": {
+        "type": "String"
+      }
+    }
+  },
+  "bluetoothDisabled": "Bluetooth is disabled. Please enable Bluetooth and try again",
+  "@bluetoothDisabled": {
+    "description": "Bluetooth disabled banner"
+  },
+  "gotIt": "Got it",
+  "@gotIt": {
+    "description": "Dismiss button"
+  },
+  "scanningDevices": "Scanning for nearby devices...",
+  "@scanningDevices": {
+    "description": "Scanning in progress text"
+  },
+  "noDevicesFound": "No devices found",
+  "@noDevicesFound": {
+    "description": "No devices found text"
+  },
+  "previouslyConnected": "Previously connected",
+  "@previouslyConnected": {
+    "description": "Previously connected badge"
+  },
+  "connect": "Connect",
+  "@connect": {
+    "description": "Connect button label"
+  },
+  "connectionFailed": "Connection failed. Please try again",
+  "@connectionFailed": {
+    "description": "Connection failed snackbar"
+  },
+  "battery": "Battery",
+  "@battery": {
+    "description": "Battery tile label"
+  },
+  "storage": "Storage",
+  "@storage": {
+    "description": "Storage tile label"
+  },
+  "remaining": "Remaining",
+  "@remaining": {
+    "description": "Remaining time tile label"
+  },
+  "recording": "Recording",
+  "@recording": {
+    "description": "Recording tile label"
+  },
+  "temperature": "Temperature",
+  "@temperature": {
+    "description": "Temperature tile label"
+  },
+  "overheating": "Overheating",
+  "@overheating": {
+    "description": "Overheating status"
+  },
+  "normal": "Normal",
+  "@normal": {
+    "description": "Normal status"
+  },
+  "status": "Status",
+  "@status": {
+    "description": "Status tile label"
+  },
+  "power": "Power",
+  "@power": {
+    "description": "Power tile label"
+  },
+  "stop": "Stop",
+  "@stop": {
+    "description": "Stop recording button"
+  },
+  "photo": "Photo",
+  "@photo": {
+    "description": "Take photo button"
+  },
+  "record": "Record",
+  "@record": {
+    "description": "Start recording button"
+  },
+  "gpsNotEnabled": "Disabled",
+  "@gpsNotEnabled": {
+    "description": "GPS disabled status"
+  },
+  "gpsAcquiring": "Acquiring",
+  "@gpsAcquiring": {
+    "description": "GPS acquiring status"
+  }
+}

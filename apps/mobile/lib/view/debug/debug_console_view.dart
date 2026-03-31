@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../models/debug_log_model.dart';
 import '../../providers/debug_provider.dart';
 import '../../utils/format_utils.dart';
@@ -17,14 +18,6 @@ class _DebugConsoleViewState extends State<DebugConsoleView> {
   final TextEditingController _hexController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  static const List<Map<String, String>> _presets = [
-    {'label': '版本查询', 'hex': '5512002b000204220000012100000d11'},
-    {'label': '开始录制', 'hex': '551200240002042200004b01000d23'},
-    {'label': '停止录制', 'hex': '551200240002042200004b00000d22'},
-    {'label': '切换拍照', 'hex': '5511002300020422000034010011'},
-    {'label': '休眠', 'hex': '5510002200020422000001a000011'},
-  ];
-
   @override
   void dispose() {
     _hexController.dispose();
@@ -36,6 +29,16 @@ class _DebugConsoleViewState extends State<DebugConsoleView> {
   Widget build(BuildContext context) {
     final debug = context.watch<DebugProvider>();
     final logs = debug.logs;
+    final l10n = AppLocalizations.of(context)!;
+
+    // Preset commands with localized labels
+    final presets = [
+      {'label': l10n.queryVersion, 'hex': '5512002b000204220000012100000d11'},
+      {'label': l10n.startRecording, 'hex': '551200240002042200004b01000d23'},
+      {'label': l10n.stopRecording, 'hex': '551200240002042200004b00000d22'},
+      {'label': l10n.switchToPhoto, 'hex': '5511002300020422000034010011'},
+      {'label': l10n.sleep, 'hex': '5510002200020422000001a000011'},
+    ];
 
     // Auto-scroll to bottom
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -50,11 +53,11 @@ class _DebugConsoleViewState extends State<DebugConsoleView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('调试台'),
+        title: Text(l10n.debugConsole),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline),
-            tooltip: '清除日志',
+            tooltip: l10n.clearLogs,
             onPressed: debug.clearLogs,
           ),
         ],
@@ -64,12 +67,12 @@ class _DebugConsoleViewState extends State<DebugConsoleView> {
           // Log list
           Expanded(
             child: logs.isEmpty
-                ? const Center(
-                    child: Text('暂无日志', style: TextStyle(color: Colors.grey)))
+                ? Center(
+                    child: Text(l10n.noLogs, style: const TextStyle(color: Colors.grey)))
                 : ListView.builder(
                     controller: _scrollController,
                     itemCount: logs.length,
-                    itemBuilder: (context, i) => _LogTile(entry: logs[i]),
+                    itemBuilder: (context, i) => _LogTile(entry: logs[i], l10n: l10n),
                   ),
           ),
 
@@ -81,12 +84,12 @@ class _DebugConsoleViewState extends State<DebugConsoleView> {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              itemCount: _presets.length,
+              itemCount: presets.length,
               separatorBuilder: (_, __) => const SizedBox(width: 8),
               itemBuilder: (context, i) => ActionChip(
-                label: Text(_presets[i]['label']!),
+                label: Text(presets[i]['label']!),
                 onPressed: () {
-                  _hexController.text = _presets[i]['hex']!;
+                  _hexController.text = presets[i]['hex']!;
                 },
               ),
             ),
@@ -100,12 +103,12 @@ class _DebugConsoleViewState extends State<DebugConsoleView> {
                 Expanded(
                   child: TextField(
                     controller: _hexController,
-                    decoration: const InputDecoration(
-                      hintText: '输入十六进制指令 (如: 55 12 00 ...)',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      hintText: l10n.enterHexCommand,
+                      border: const OutlineInputBorder(),
                       isDense: true,
                       contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     ),
                     style: const TextStyle(
                         fontFamily: 'monospace', fontSize: 12),
@@ -127,7 +130,7 @@ class _DebugConsoleViewState extends State<DebugConsoleView> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: const Text('发送'),
+                  child: Text(l10n.send),
                 ),
               ],
             ),
@@ -140,7 +143,8 @@ class _DebugConsoleViewState extends State<DebugConsoleView> {
 
 class _LogTile extends StatelessWidget {
   final DebugLogEntry entry;
-  const _LogTile({required this.entry});
+  final AppLocalizations l10n;
+  const _LogTile({required this.entry, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +169,7 @@ class _LogTile extends StatelessWidget {
       onLongPress: () {
         Clipboard.setData(ClipboardData(text: entry.message));
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('已复制到剪贴板')),
+          SnackBar(content: Text(l10n.copiedToClipboard)),
         );
       },
       child: Padding(
