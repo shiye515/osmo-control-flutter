@@ -120,4 +120,4 @@ pnpm dlx create-turbo@latest
 在生成后按上述目录规范整理 apps/web 与 apps/mobile，并补齐依赖和基础配置。
 
 
-创建项目并将上面的内容存储为agent.md，使用agent.md 中的约束,将项目https://github.com/AlliotTech/osmoControl重构为flutter的版本
+蓝牙相关的文档请先去 ./docs文件夹中查找
