@@ -81,6 +81,10 @@ class GpsProvider extends ChangeNotifier {
         longitude: position.longitude,
         altitude: position.altitude,
         accuracy: position.accuracy,
+        speed: position.speed,
+        heading: position.heading,
+        verticalAccuracy: position.altitudeAccuracy,
+        speedAccuracy: position.speedAccuracy,
         timestamp: position.timestamp,
       );
       notifyListeners();
@@ -160,6 +164,8 @@ class GpsProvider extends ChangeNotifier {
       longitude: lng,
       altitude: alt,
       accuracy: 0,
+      speed: 0,
+      heading: 0,
       timestamp: DateTime.now(),
     );
     _lastGpsPoint = point;

@@ -544,6 +544,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Disconnected'**
   String get disconnected;
+
+  /// Position info section title
+  ///
+  /// In en, this message translates to:
+  /// **'Position'**
+  String get positionInfo;
+
+  /// Speed info section title
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get speedInfo;
+
+  /// Accuracy info section title
+  ///
+  /// In en, this message translates to:
+  /// **'Accuracy'**
+  String get accuracyInfo;
+
+  /// Speed label
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get speed;
+
+  /// Northward speed label
+  ///
+  /// In en, this message translates to:
+  /// **'N Speed'**
+  String get speedNorth;
+
+  /// Eastward speed label
+  ///
+  /// In en, this message translates to:
+  /// **'E Speed'**
+  String get speedEast;
+
+  /// Horizontal accuracy label
+  ///
+  /// In en, this message translates to:
+  /// **'Horizontal'**
+  String get horizontalAccuracy;
+
+  /// Vertical accuracy label
+  ///
+  /// In en, this message translates to:
+  /// **'Vertical'**
+  String get verticalAccuracy;
+
+  /// Speed accuracy label
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get speedAccuracy;
+
+  /// Satellite count label
+  ///
+  /// In en, this message translates to:
+  /// **'Satellites'**
+  String get satelliteCount;
+
+  /// Placeholder for unavailable data
+  ///
+  /// In en, this message translates to:
+  /// **'--'**
+  String get notAvailable;
 }
 
 class _AppLocalizationsDelegate

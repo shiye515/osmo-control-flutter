@@ -233,6 +233,39 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get disconnected => '未连接';
+
+  @override
+  String get positionInfo => '位置信息';
+
+  @override
+  String get speedInfo => '速度信息';
+
+  @override
+  String get accuracyInfo => '精度信息';
+
+  @override
+  String get speed => '速度';
+
+  @override
+  String get speedNorth => '向北速度';
+
+  @override
+  String get speedEast => '向东速度';
+
+  @override
+  String get horizontalAccuracy => '水平精度';
+
+  @override
+  String get verticalAccuracy => '垂直精度';
+
+  @override
+  String get speedAccuracy => '速度精度';
+
+  @override
+  String get satelliteCount => '卫星数量';
+
+  @override
+  String get notAvailable => '--';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -464,4 +497,37 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get disconnected => '未連接';
+
+  @override
+  String get positionInfo => '位置資訊';
+
+  @override
+  String get speedInfo => '速度資訊';
+
+  @override
+  String get accuracyInfo => '精度資訊';
+
+  @override
+  String get speed => '速度';
+
+  @override
+  String get speedNorth => '向北速度';
+
+  @override
+  String get speedEast => '向東速度';
+
+  @override
+  String get horizontalAccuracy => '水平精度';
+
+  @override
+  String get verticalAccuracy => '垂直精度';
+
+  @override
+  String get speedAccuracy => '速度精度';
+
+  @override
+  String get satelliteCount => '衛星數量';
+
+  @override
+  String get notAvailable => '--';
 }

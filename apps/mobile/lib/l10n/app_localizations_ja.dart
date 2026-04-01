@@ -233,4 +233,37 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get disconnected => '未接続';
+
+  @override
+  String get positionInfo => '位置情報';
+
+  @override
+  String get speedInfo => '速度情報';
+
+  @override
+  String get accuracyInfo => '精度情報';
+
+  @override
+  String get speed => '速度';
+
+  @override
+  String get speedNorth => '北向速度';
+
+  @override
+  String get speedEast => '東向速度';
+
+  @override
+  String get horizontalAccuracy => '水平精度';
+
+  @override
+  String get verticalAccuracy => '垂直精度';
+
+  @override
+  String get speedAccuracy => '速度精度';
+
+  @override
+  String get satelliteCount => '衛星数';
+
+  @override
+  String get notAvailable => '--';
 }

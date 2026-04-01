@@ -237,4 +237,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get disconnected => 'Disconnected';
+
+  @override
+  String get positionInfo => 'Position';
+
+  @override
+  String get speedInfo => 'Speed';
+
+  @override
+  String get accuracyInfo => 'Accuracy';
+
+  @override
+  String get speed => 'Speed';
+
+  @override
+  String get speedNorth => 'N Speed';
+
+  @override
+  String get speedEast => 'E Speed';
+
+  @override
+  String get horizontalAccuracy => 'Horizontal';
+
+  @override
+  String get verticalAccuracy => 'Vertical';
+
+  @override
+  String get speedAccuracy => 'Speed';
+
+  @override
+  String get satelliteCount => 'Satellites';
+
+  @override
+  String get notAvailable => '--';
 }

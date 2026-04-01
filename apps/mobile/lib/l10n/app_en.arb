@@ -305,5 +305,49 @@
   "disconnected": "Disconnected",
   "@disconnected": {
     "description": "Device disconnected status"
+  },
+  "positionInfo": "Position",
+  "@positionInfo": {
+    "description": "Position info section title"
+  },
+  "speedInfo": "Speed",
+  "@speedInfo": {
+    "description": "Speed info section title"
+  },
+  "accuracyInfo": "Accuracy",
+  "@accuracyInfo": {
+    "description": "Accuracy info section title"
+  },
+  "speed": "Speed",
+  "@speed": {
+    "description": "Speed label"
+  },
+  "speedNorth": "N Speed",
+  "@speedNorth": {
+    "description": "Northward speed label"
+  },
+  "speedEast": "E Speed",
+  "@speedEast": {
+    "description": "Eastward speed label"
+  },
+  "horizontalAccuracy": "Horizontal",
+  "@horizontalAccuracy": {
+    "description": "Horizontal accuracy label"
+  },
+  "verticalAccuracy": "Vertical",
+  "@verticalAccuracy": {
+    "description": "Vertical accuracy label"
+  },
+  "speedAccuracy": "Speed",
+  "@speedAccuracy": {
+    "description": "Speed accuracy label"
+  },
+  "satelliteCount": "Satellites",
+  "@satelliteCount": {
+    "description": "Satellite count label"
+  },
+  "notAvailable": "--",
+  "@notAvailable": {
+    "description": "Placeholder for unavailable data"
   }
 }

@@ -73,5 +73,16 @@
   "interval2s": "2秒",
   "interval5s": "5秒",
   "interval10s": "10秒",
-  "disconnected": "未接続"
+  "disconnected": "未接続",
+  "positionInfo": "位置情報",
+  "speedInfo": "速度情報",
+  "accuracyInfo": "精度情報",
+  "speed": "速度",
+  "speedNorth": "北向速度",
+  "speedEast": "東向速度",
+  "horizontalAccuracy": "水平精度",
+  "verticalAccuracy": "垂直精度",
+  "speedAccuracy": "速度精度",
+  "satelliteCount": "衛星数",
+  "notAvailable": "--"
 }
