@@ -154,8 +154,7 @@ class GpsProvider extends ChangeNotifier {
   Future<void> _pushCurrentLocation() async {
     final point = _lastGpsPoint;
     if (point == null) return;
-    await _sessionProvider?.pushGps(
-        point.latitude, point.longitude, point.altitude);
+    await _sessionProvider?.pushGps(point);
   }
 
   Future<void> pushGpsNow(double lat, double lng, double alt) async {
@@ -170,7 +169,7 @@ class GpsProvider extends ChangeNotifier {
     );
     _lastGpsPoint = point;
     notifyListeners();
-    await _sessionProvider?.pushGps(lat, lng, alt);
+    await _sessionProvider?.pushGps(point);
   }
 
   @override

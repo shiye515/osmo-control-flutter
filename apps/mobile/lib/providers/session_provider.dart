@@ -2,12 +2,14 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
+import '../api/dji_r_protocol.dart';
 import '../api/protocol_codec.dart';
 import '../config/app_constants.dart';
 import '../models/session_device_model.dart';
 import '../models/camera_status_model.dart';
 import '../models/scan_result_model.dart';
 import '../models/debug_log_model.dart';
+import '../models/gps_point_model.dart';
 import '../services/device_memory_service.dart';
 import 'ble_provider.dart';
 
@@ -233,16 +235,40 @@ class SessionProvider extends ChangeNotifier {
     await _bleProvider?.subscribeCameraStatus();
   }
 
-  Future<void> pushGps(
-      double latitude, double longitude, double altitude) async {
+  Future<void> pushGps(GpsPointModel gpsPoint) async {
     if (!isConnected && !_isFakeMode) return;
     if (_isFakeMode) {
       _addLog(LogDirection.system,
-          '[Fake] GPS push: $latitude, $longitude, $altitude');
+          '[Fake] GPS push: ${gpsPoint.latitude}, ${gpsPoint.longitude}, ${gpsPoint.altitude}');
       return;
     }
-    final cmd = ProtocolCodec.buildPushGps(
-        latitude: latitude, longitude: longitude, altitude: altitude);
+
+    // Handle unavailable speed (geolocator returns -1)
+    final speedNorth = gpsPoint.hasSpeed ? gpsPoint.speedNorth : 0.0;
+    final speedEast = gpsPoint.hasSpeed ? gpsPoint.speedEast : 0.0;
+    const speedDownward = 0.0; // Not available from geolocator
+
+    // Convert accuracy to mm (meters * 1000)
+    final verticalAccuracyMm = (gpsPoint.verticalAccuracy ?? 0.0) * 1000;
+    final horizontalAccuracyMm = gpsPoint.accuracy * 1000;
+    final speedAccuracyCmS = (gpsPoint.speedAccuracy ?? 0.0) * 100;
+
+    // Placeholder satellite count (geolocator doesn't provide this)
+    const satelliteCount = 10;
+
+    final cmd = DjiRProtocol.buildPushGps(
+      timestamp: gpsPoint.timestamp,
+      latitude: gpsPoint.latitude,
+      longitude: gpsPoint.longitude,
+      altitude: gpsPoint.altitude,
+      speedNorth: speedNorth,
+      speedEast: speedEast,
+      speedDownward: speedDownward,
+      verticalAccuracy: verticalAccuracyMm.round(),
+      horizontalAccuracy: horizontalAccuracyMm.round(),
+      speedAccuracy: speedAccuracyCmS.round(),
+      satelliteCount: satelliteCount,
+    );
     await sendRawCommand(cmd);
   }
 

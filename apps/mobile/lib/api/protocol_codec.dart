@@ -83,33 +83,6 @@ class ProtocolCodec {
     return buildCommand(cmdSet: 0x00, cmdId: 0x01, payload: []);
   }
 
-  /// GPS push command.
-  static List<int> buildPushGps({
-    required double latitude,
-    required double longitude,
-    required double altitude,
-  }) {
-    final payload = List<int>.filled(20, 0);
-    final latInt = (latitude * 1e7).round();
-    final lngInt = (longitude * 1e7).round();
-    final altInt = (altitude * 1000).round();
-
-    payload[0] = latInt & 0xFF;
-    payload[1] = (latInt >> 8) & 0xFF;
-    payload[2] = (latInt >> 16) & 0xFF;
-    payload[3] = (latInt >> 24) & 0xFF;
-    payload[4] = lngInt & 0xFF;
-    payload[5] = (lngInt >> 8) & 0xFF;
-    payload[6] = (lngInt >> 16) & 0xFF;
-    payload[7] = (lngInt >> 24) & 0xFF;
-    payload[8] = altInt & 0xFF;
-    payload[9] = (altInt >> 8) & 0xFF;
-    payload[10] = (altInt >> 16) & 0xFF;
-    payload[11] = (altInt >> 24) & 0xFF;
-
-    return buildCommand(cmdSet: 0x04, cmdId: 0x08, payload: payload);
-  }
-
   /// Parse a response frame, returning the payload bytes if valid.
   static List<int>? parseResponse(List<int> data) {
     if (data.length < 13) return null;

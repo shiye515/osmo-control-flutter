@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../utils/dji_r_crc.dart';
 
 /// DJI R SDK protocol frame encoder/parser.
@@ -10,6 +12,13 @@ class DjiRProtocol {
   static int _nextSeq() {
     _sequenceNumber = (_sequenceNumber + 1) & 0xFFFF;
     return _sequenceNumber;
+  }
+
+  /// Convert double to IEEE 754 float32 bytes (little-endian).
+  static List<int> _float32ToBytes(double value) {
+    final buffer = ByteData(4);
+    buffer.setFloat32(0, value, Endian.little);
+    return buffer.buffer.asUint8List().toList();
   }
 
   /// Build a DJI R SDK command frame.
@@ -269,6 +278,114 @@ class DjiRProtocol {
       cmdId: 0x05,
       payload: [pushMode, pushFreq, 0x00, 0x00, 0x00, 0x00],
     );
+  }
+
+  /// Build GPS data push command (CmdSet=0x00, CmdID=0x17).
+  /// Payload is 48 bytes with date/time, position, speed, accuracy, and satellite count.
+  static List<int> buildPushGps({
+    required DateTime timestamp,
+    required double latitude,
+    required double longitude,
+    required double altitude,
+    required double speedNorth,
+    required double speedEast,
+    required double speedDownward,
+    required int verticalAccuracy,
+    required int horizontalAccuracy,
+    required int speedAccuracy,
+    required int satelliteCount,
+  }) {
+    final payload = <int>[];
+
+    // year_month_day (int32_t): year*10000 + month*100 + day
+    final yearMonthDay = timestamp.year * 10000 + timestamp.month * 100 + timestamp.day;
+    payload.addAll([
+      yearMonthDay & 0xFF,
+      (yearMonthDay >> 8) & 0xFF,
+      (yearMonthDay >> 16) & 0xFF,
+      (yearMonthDay >> 24) & 0xFF,
+    ]);
+
+    // hour_minute_second (int32_t): (hour+8)*10000 + minute*100 + second
+    // Note: Spec requires UTC+8 timezone offset
+    final hourMinuteSecond = ((timestamp.hour + 8) % 24) * 10000 + timestamp.minute * 100 + timestamp.second;
+    payload.addAll([
+      hourMinuteSecond & 0xFF,
+      (hourMinuteSecond >> 8) & 0xFF,
+      (hourMinuteSecond >> 16) & 0xFF,
+      (hourMinuteSecond >> 24) & 0xFF,
+    ]);
+
+    // gps_longitude (int32_t): actual * 10^7
+    final lngInt = (longitude * 1e7).round();
+    payload.addAll([
+      lngInt & 0xFF,
+      (lngInt >> 8) & 0xFF,
+      (lngInt >> 16) & 0xFF,
+      (lngInt >> 24) & 0xFF,
+    ]);
+
+    // gps_latitude (int32_t): actual * 10^7
+    final latInt = (latitude * 1e7).round();
+    payload.addAll([
+      latInt & 0xFF,
+      (latInt >> 8) & 0xFF,
+      (latInt >> 16) & 0xFF,
+      (latInt >> 24) & 0xFF,
+    ]);
+
+    // height (int32_t): mm
+    final heightInt = (altitude * 1000).round();
+    payload.addAll([
+      heightInt & 0xFF,
+      (heightInt >> 8) & 0xFF,
+      (heightInt >> 16) & 0xFF,
+      (heightInt >> 24) & 0xFF,
+    ]);
+
+    // speed_to_north (float): cm/s
+    payload.addAll(_float32ToBytes(speedNorth * 100)); // m/s -> cm/s
+
+    // speed_to_east (float): cm/s
+    payload.addAll(_float32ToBytes(speedEast * 100)); // m/s -> cm/s
+
+    // speed_to_downward (float): cm/s
+    payload.addAll(_float32ToBytes(speedDownward * 100)); // m/s -> cm/s
+
+    // vertical_accuracy_estimate (uint32_t): mm
+    payload.addAll([
+      verticalAccuracy & 0xFF,
+      (verticalAccuracy >> 8) & 0xFF,
+      (verticalAccuracy >> 16) & 0xFF,
+      (verticalAccuracy >> 24) & 0xFF,
+    ]);
+
+    // horizontal_accuracy_estimate (uint32_t): mm
+    payload.addAll([
+      horizontalAccuracy & 0xFF,
+      (horizontalAccuracy >> 8) & 0xFF,
+      (horizontalAccuracy >> 16) & 0xFF,
+      (horizontalAccuracy >> 24) & 0xFF,
+    ]);
+
+    // speed_accuracy_estimate (uint32_t): cm/s
+    payload.addAll([
+      speedAccuracy & 0xFF,
+      (speedAccuracy >> 8) & 0xFF,
+      (speedAccuracy >> 16) & 0xFF,
+      (speedAccuracy >> 24) & 0xFF,
+    ]);
+
+    // satellite_number (uint32_t)
+    payload.addAll([
+      satelliteCount & 0xFF,
+      (satelliteCount >> 8) & 0xFF,
+      (satelliteCount >> 16) & 0xFF,
+      (satelliteCount >> 24) & 0xFF,
+    ]);
+
+    // Use cmdType=0x01 (ack optional) per spec
+    return buildFrame(cmdSet: 0x00, cmdId: 0x17, payload: payload, cmdType: 0x01);
   }
 
   /// Generate wake-up advertisement data for a sleeping camera.
