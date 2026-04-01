@@ -2,6 +2,15 @@
 
 一个用于控制 DJI Osmo 设备的跨平台移动应用，支持 iOS 和 Android。
 
+> 🙏 如果这个项目对你有帮助，请考虑请作者喝杯咖啡，您的支持是我继续维护的动力...
+>
+> <img src="docs/qr.JPG" width="200" alt="打赏二维码">
+
+## 下载
+
+- **Android**: [前往 Releases 下载 APK](https://github.com/shiye515/osmo-control-flutter/releases)
+- **iOS**: 🍎 正在等待 App Store 审核，敬请期待...
+
 ## 功能特性
 
 ### 设备状态显示
@@ -23,11 +32,12 @@
 
 ## 测试设备
 
-| 设备类型 | 型号 |
-|---------|------|
-| iOS | iPhone XS, iPhone 16 Pro Max |
-| Android | Google Pixel X Style |
-| 相机 | DJI Osmo Action 4 |
+| 设备类型 | 型号                         |
+| -------- | ---------------------------- |
+| iOS      | iPhone XS, iPhone 16 Pro Max |
+| Android  | Google Pixel X Style         |
+| 相机     | DJI Osmo Action 4            |
+
 
 ## 技术栈
 
@@ -72,7 +82,7 @@ flutter build ios
 
 ## 协议参考
 
-本应用使用 DJI R SDK 协议与 Osmo 设备通信，协议文档位于 `docs/protocol_data_segment_CN.md`。
+本应用使用 DJI R SDK 协议与 Osmo 设备通信，协议文档参考[Osmo-GPS-Controller-Demo](https://github.com/dji-sdk/Osmo-GPS-Controller-Demo)
 
 ## License
 
