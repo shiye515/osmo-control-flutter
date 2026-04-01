@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
-import '../api/dji_r_protocol.dart';
 import '../api/protocol_codec.dart';
 import '../config/app_constants.dart';
 import '../models/session_device_model.dart';
@@ -256,7 +255,7 @@ class SessionProvider extends ChangeNotifier {
     // Placeholder satellite count (geolocator doesn't provide this)
     const satelliteCount = 10;
 
-    final cmd = DjiRProtocol.buildPushGps(
+    final success = await _bleProvider?.sendPushGps(
       timestamp: gpsPoint.timestamp,
       latitude: gpsPoint.latitude,
       longitude: gpsPoint.longitude,
@@ -269,7 +268,12 @@ class SessionProvider extends ChangeNotifier {
       speedAccuracy: speedAccuracyCmS.round(),
       satelliteCount: satelliteCount,
     );
-    await sendRawCommand(cmd);
+
+    if (success == true) {
+      _addLog(LogDirection.sent, 'GPS push: ${gpsPoint.latitude.toStringAsFixed(6)}, ${gpsPoint.longitude.toStringAsFixed(6)}');
+    } else {
+      _addLog(LogDirection.system, 'GPS push failed');
+    }
   }
 
   Future<void> disconnect() async {

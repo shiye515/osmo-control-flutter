@@ -16,4 +16,4 @@
 ## 3. Cleanup
 
 - [x] 3.1 Mark deprecated or remove `ProtocolCodec.buildPushGps` method
-- [ ] 3.2 Test GPS push with BLE packet logging to verify correct frame format
+- [x] 3.2 Test GPS push with BLE packet logging to verify correct frame format

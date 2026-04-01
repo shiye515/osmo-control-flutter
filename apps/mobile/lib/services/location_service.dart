@@ -76,7 +76,6 @@ class LocationService {
         ),
       );
       _currentPosition = position;
-      _log.info('Got position: ${position.latitude}, ${position.longitude}');
       return position;
     } catch (e) {
       _log.warning('Failed to get position: $e');
@@ -105,9 +104,6 @@ class LocationService {
     ).listen(
       (Position position) {
         _currentPosition = position;
-        _log.info('Position: lat=${position.latitude}, lng=${position.longitude}, '
-            'speed=${position.speed}, heading=${position.heading}, '
-            'speedAcc=${position.speedAccuracy}, altAcc=${position.altitudeAccuracy}');
         _positionController.add(position);
       },
       onError: (error) {

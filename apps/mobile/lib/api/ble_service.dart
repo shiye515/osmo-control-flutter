@@ -434,6 +434,38 @@ class BleService {
     return await _writeFrame(frame);
   }
 
+  /// Send GPS data push command.
+  Future<bool> sendPushGps({
+    required DateTime timestamp,
+    required double latitude,
+    required double longitude,
+    required double altitude,
+    required double speedNorth,
+    required double speedEast,
+    required double speedDownward,
+    required int verticalAccuracy,
+    required int horizontalAccuracy,
+    required int speedAccuracy,
+    required int satelliteCount,
+  }) async {
+    if (_writeCharacteristic == null) return false;
+    _log.info('Sending GPS push: lat=$latitude, lng=$longitude, alt=$altitude');
+    final frame = DjiRProtocol.buildPushGps(
+      timestamp: timestamp,
+      latitude: latitude,
+      longitude: longitude,
+      altitude: altitude,
+      speedNorth: speedNorth,
+      speedEast: speedEast,
+      speedDownward: speedDownward,
+      verticalAccuracy: verticalAccuracy,
+      horizontalAccuracy: horizontalAccuracy,
+      speedAccuracy: speedAccuracy,
+      satelliteCount: satelliteCount,
+    );
+    return await _writeFrame(frame);
+  }
+
   /// Generate wake-up advertisement data for a sleeping camera.
   static List<int> getWakeUpAdvData(String macAddress) {
     return DjiRProtocol.buildWakeUpAdvData(macAddress);
