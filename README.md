@@ -86,4 +86,7 @@ flutter build ios
 
 ## License
 
-MIT
+本作品采用 [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh-hans) 协议授权。
+
+允许：分享、个人学习使用
+禁止：商业使用、修改后分发
