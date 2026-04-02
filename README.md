@@ -35,7 +35,7 @@
 | 设备类型 | 型号                         |
 | -------- | ---------------------------- |
 | iOS      | iPhone XS, iPhone 16 Pro Max |
-| Android  | Google Pixel X Style         |
+| Android  | Moto X Style         |
 | 相机     | DJI Osmo Action 4            |
 
 
