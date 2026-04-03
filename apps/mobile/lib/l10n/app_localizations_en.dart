@@ -285,4 +285,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timelapseInterval => 'Interval';
+
+  @override
+  String get disconnect => 'Disconnect';
+
+  @override
+  String get pushDisabled => 'Push Disabled';
+
+  @override
+  String get pushEnabled => 'Push Enabled';
 }

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../view/home/home_shell.dart';
 import '../view/workbench/workbench_view.dart';
 import '../view/debug/debug_console_view.dart';
-import '../view/gps/gps_settings_view.dart';
 import '../view/settings/settings_view.dart';
 
 class AppRouter {
@@ -32,12 +31,6 @@ class AppRouter {
             path: '/debug',
             pageBuilder: (context, state) => const NoTransitionPage(
               child: DebugConsoleView(),
-            ),
-          ),
-          GoRoute(
-            path: '/gps',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: GpsSettingsView(),
             ),
           ),
           GoRoute(

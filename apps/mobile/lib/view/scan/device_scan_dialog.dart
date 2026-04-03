@@ -123,17 +123,21 @@ class _DeviceScanDialogState extends State<DeviceScanDialog> {
                 child: Column(
                   children: [
                     if (!ble.isAvailable) _BleUnavailableBanner(l10n: l10n),
-                    if (session.rememberedDevice != null &&
-                        !_autoConnectAttempted)
-                      _AutoConnectBanner(
-                          deviceName: session.rememberedDevice!.name,
-                          l10n: l10n),
+                    // Connected device section
+                    if (session.isConnected)
+                      _ConnectedDeviceTile(
+                        deviceName: session.connectedDevice?.deviceName ?? 'Osmo',
+                        onDisconnect: () => _onDisconnect(session),
+                        l10n: l10n,
+                      ),
                     if (ble.scanResults.isEmpty)
                       _EmptyState(isScanning: ble.isScanning, l10n: l10n)
                     else
                       ...ble.scanResults.map((result) {
                         final isRemembered =
                             session.rememberedDevice?.id == result.deviceId;
+                        final isConnected = session.connectedDevice?.deviceId == result.deviceId;
+                        if (isConnected) return const SizedBox.shrink(); // Skip already connected device
                         return _DeviceTile(
                           result: result,
                           isConnecting:
@@ -182,6 +186,12 @@ class _DeviceScanDialogState extends State<DeviceScanDialog> {
     final remembered = session.rememberedDevice;
     if (remembered == null) return;
 
+    // Skip auto-connect if user manually disconnected this device
+    if (session.userDisconnectedDeviceId == remembered.id) return;
+
+    // Skip auto-connect if already connected
+    if (session.isConnected) return;
+
     final found = results.any((r) => r.deviceId == remembered.id);
     if (found) {
       _autoConnectAttempted = true;
@@ -192,37 +202,9 @@ class _DeviceScanDialogState extends State<DeviceScanDialog> {
       );
     }
   }
-}
 
-class _AutoConnectBanner extends StatelessWidget {
-  final String deviceName;
-  final AppLocalizations l10n;
-  const _AutoConnectBanner({required this.deviceName, required this.l10n});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Theme.of(context).colorScheme.primaryContainer,
-      child: Row(
-        children: [
-          Icon(
-            Icons.bluetooth_searching,
-            size: 20,
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              l10n.searchingFor(deviceName),
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  void _onDisconnect(SessionProvider session) {
+    session.disconnectManually();
   }
 }
 
@@ -241,6 +223,50 @@ class _BleUnavailableBanner extends StatelessWidget {
           child: Text(l10n.gotIt),
         ),
       ],
+    );
+  }
+}
+
+/// Tile showing the currently connected device with disconnect button.
+class _ConnectedDeviceTile extends StatelessWidget {
+  final String deviceName;
+  final VoidCallback onDisconnect;
+  final AppLocalizations l10n;
+  const _ConnectedDeviceTile({
+    required this.deviceName,
+    required this.onDisconnect,
+    required this.l10n,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+        ),
+      ),
+      child: ListTile(
+        leading: Icon(
+          Icons.bluetooth_connected,
+          color: theme.colorScheme.primary,
+        ),
+        title: Text(
+          deviceName,
+          style: const TextStyle(fontWeight: FontWeight.w500),
+        ),
+        trailing: TextButton(
+          onPressed: onDisconnect,
+          child: Text(
+            l10n.disconnect,
+            style: TextStyle(color: theme.colorScheme.error),
+          ),
+        ),
+      ),
     );
   }
 }

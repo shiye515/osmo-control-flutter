@@ -46,17 +46,18 @@ The system SHALL send GPS data push command (CmdSet=0x00, CmdID=0x17) with paylo
 - **THEN** system sends height=10500 (mm)
 
 ### Requirement: GPS auto-push control
-The system SHALL start GPS acquisition and push automatically when auto-push is enabled. When a new GPS position is received, the system SHALL immediately push the data to the camera.
+The system SHALL provide GPS auto-push control via the home screen toggle tile. Users SHALL be able to enable/disable GPS auto-push by tapping the GPS tile in the status grid. When enabled, the system SHALL start GPS acquisition and push automatically when a new GPS position is received.
 
-#### Scenario: Enable auto-push
-- **WHEN** user enables auto-push toggle
-- **THEN** system starts GPS acquisition
+#### Scenario: Toggle GPS auto-push on
+- **WHEN** user taps the GPS toggle tile to enable
+- **THEN** system toggles autoPushEnabled state to true
+- **AND** system starts GPS acquisition
 - **AND** system pushes GPS data immediately when new position is received
 
-#### Scenario: Disable auto-push
-- **WHEN** user disables auto-push toggle
-- **THEN** system stops pushing GPS data
-- **AND** GPS acquisition continues for position display
+#### Scenario: Toggle GPS auto-push off
+- **WHEN** user taps the GPS toggle tile to disable
+- **THEN** system toggles autoPushEnabled state to false
+- **AND** system stops pushing GPS data
 
 #### Scenario: Real-time push on GPS update
 - **WHEN** GPS provides a new position update

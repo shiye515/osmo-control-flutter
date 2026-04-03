@@ -281,4 +281,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get timelapseInterval => '間隔';
+
+  @override
+  String get disconnect => '切断';
+
+  @override
+  String get pushDisabled => '送信無効';
+
+  @override
+  String get pushEnabled => '送信有効';
 }

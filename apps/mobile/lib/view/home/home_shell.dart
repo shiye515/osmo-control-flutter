@@ -17,8 +17,7 @@ class HomeShell extends StatelessWidget {
 
     int selectedIndex = 0;
     if (location.startsWith('/debug')) selectedIndex = 1;
-    if (location.startsWith('/gps')) selectedIndex = 2;
-    if (location.startsWith('/settings')) selectedIndex = 3;
+    if (location.startsWith('/settings')) selectedIndex = 2;
 
     return Scaffold(
       body: child,
@@ -33,9 +32,6 @@ class HomeShell extends StatelessWidget {
               context.go('/debug');
               break;
             case 2:
-              context.go('/gps');
-              break;
-            case 3:
               context.go('/settings');
               break;
           }
@@ -53,11 +49,6 @@ class HomeShell extends StatelessWidget {
             ),
             selectedIcon: const Icon(Icons.bug_report),
             label: l10n.navDebug,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.location_on_outlined),
-            selectedIcon: const Icon(Icons.location_on),
-            label: l10n.navGps,
           ),
           NavigationDestination(
             icon: const Icon(Icons.settings_outlined),

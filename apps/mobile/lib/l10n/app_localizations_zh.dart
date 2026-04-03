@@ -281,6 +281,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get timelapseInterval => '延时间隔';
+
+  @override
+  String get disconnect => '断开连接';
+
+  @override
+  String get pushDisabled => '推送未开启';
+
+  @override
+  String get pushEnabled => '推送已开启';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -560,4 +569,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get timelapseInterval => '延時間隔';
+
+  @override
+  String get disconnect => '中斷連線';
+
+  @override
+  String get pushDisabled => '推送未開啟';
+
+  @override
+  String get pushEnabled => '推送已開啟';
 }

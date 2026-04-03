@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class DeviceMemoryService {
   static const String _keyLastDeviceId = 'last_device_id';
   static const String _keyLastDeviceName = 'last_device_name';
+  static const String _keyUserDisconnectedId = 'user_disconnected_device_id';
 
   /// Save device ID and name to persistent storage.
   Future<void> saveDevice(String deviceId, String deviceName) async {
@@ -33,5 +34,24 @@ class DeviceMemoryService {
   Future<bool> hasDevice() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.containsKey(_keyLastDeviceId);
+  }
+
+  /// Save the device ID that user manually disconnected.
+  /// This prevents auto-connect for this device until user manually connects again.
+  Future<void> saveUserDisconnectedId(String deviceId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyUserDisconnectedId, deviceId);
+  }
+
+  /// Get the device ID that user manually disconnected.
+  Future<String?> getUserDisconnectedId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyUserDisconnectedId);
+  }
+
+  /// Clear the user disconnected device ID (after successful manual connect).
+  Future<void> clearUserDisconnectedId() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyUserDisconnectedId);
   }
 }

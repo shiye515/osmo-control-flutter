@@ -25,6 +25,7 @@ class SessionProvider extends ChangeNotifier {
   bool _isFakeMode = false;
   String? _lastError;
   ({String id, String name})? _rememberedDevice;
+  String? _userDisconnectedDeviceId; // Device ID that user manually disconnected
 
   SessionDeviceModel? get connectedDevice => _connectedDevice;
   CameraStatusModel get cameraStatus => _cameraStatus;
@@ -38,6 +39,7 @@ class SessionProvider extends ChangeNotifier {
   bool get isSleeping => powerMode == 3;
   int get cameraDeviceId => _bleProvider?.cameraDeviceId ?? 0;
   ({String id, String name})? get rememberedDevice => _rememberedDevice;
+  String? get userDisconnectedDeviceId => _userDisconnectedDeviceId;
 
   StreamSubscription<List<int>>? _notifySubscription;
   StreamSubscription<int>? _powerModeSubscription;
@@ -78,6 +80,11 @@ class SessionProvider extends ChangeNotifier {
       // Save device to memory
       await _deviceMemory.saveDevice(deviceId, deviceName);
       _rememberedDevice = (id: deviceId, name: deviceName);
+      // Clear user disconnected flag on successful manual connect
+      if (_userDisconnectedDeviceId == deviceId) {
+        await _deviceMemory.clearUserDisconnectedId();
+        _userDisconnectedDeviceId = null;
+      }
     } else {
       _connectedDevice = null;
       _lastError = 'Connection failed';
@@ -290,9 +297,23 @@ class SessionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Disconnect and mark the device as user manually disconnected.
+  /// This prevents auto-connect for this device until user manually connects again.
+  Future<void> disconnectManually() async {
+    final deviceId = _connectedDevice?.deviceId;
+    await disconnect();
+    if (deviceId != null) {
+      await _deviceMemory.saveUserDisconnectedId(deviceId);
+      _userDisconnectedDeviceId = deviceId;
+      _addLog(LogDirection.system, 'Manually disconnected from device');
+      notifyListeners();
+    }
+  }
+
   /// Load remembered device from storage.
   Future<void> loadRememberedDevice() async {
     _rememberedDevice = await _deviceMemory.getDevice();
+    _userDisconnectedDeviceId = await _deviceMemory.getUserDisconnectedId();
     notifyListeners();
   }
 

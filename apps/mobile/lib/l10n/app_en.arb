@@ -369,5 +369,17 @@
   "timelapseInterval": "Interval",
   "@timelapseInterval": {
     "description": "Timelapse interval tile label"
+  },
+  "disconnect": "Disconnect",
+  "@disconnect": {
+    "description": "Disconnect button label"
+  },
+  "pushDisabled": "Push Disabled",
+  "@pushDisabled": {
+    "description": "GPS push disabled status"
+  },
+  "pushEnabled": "Push Enabled",
+  "@pushEnabled": {
+    "description": "GPS push enabled status"
   }
 }

@@ -89,5 +89,8 @@
   "remainingPhotos": "撮影可能",
   "loopRecording": "ループ",
   "photoCountdown": "カウントダウン",
-  "timelapseInterval": "間隔"
+  "timelapseInterval": "間隔",
+  "disconnect": "切断",
+  "pushDisabled": "送信無効",
+  "pushEnabled": "送信有効"
 }

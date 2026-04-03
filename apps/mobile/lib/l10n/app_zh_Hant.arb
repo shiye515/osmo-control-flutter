@@ -89,5 +89,8 @@
   "remainingPhotos": "剩餘張數",
   "loopRecording": "循環錄製",
   "photoCountdown": "拍照倒數",
-  "timelapseInterval": "延時間隔"
+  "timelapseInterval": "延時間隔",
+  "disconnect": "中斷連線",
+  "pushDisabled": "推送未開啟",
+  "pushEnabled": "推送已開啟"
 }

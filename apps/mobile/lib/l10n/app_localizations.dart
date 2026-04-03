@@ -640,6 +640,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Interval'**
   String get timelapseInterval;
+
+  /// Disconnect button label
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get disconnect;
+
+  /// GPS push disabled status
+  ///
+  /// In en, this message translates to:
+  /// **'Push Disabled'**
+  String get pushDisabled;
+
+  /// GPS push enabled status
+  ///
+  /// In en, this message translates to:
+  /// **'Push Enabled'**
+  String get pushEnabled;
 }
 
 class _AppLocalizationsDelegate

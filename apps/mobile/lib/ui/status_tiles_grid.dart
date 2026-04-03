@@ -15,10 +15,11 @@ class StatusTilesGrid extends StatelessWidget {
   final bool isConnected;
   final String? deviceName;
   final int deviceId;
-  final bool gpsEnabled;
+  final bool autoPushEnabled;
   final GpsPointModel? gpsPoint;
   final VoidCallback? onShowScanDialog;
   final VoidCallback? onRecordControl;
+  final VoidCallback? onGpsToggle;
   final void Function(int mode)? onModeSelected;
 
   const StatusTilesGrid({
@@ -26,11 +27,12 @@ class StatusTilesGrid extends StatelessWidget {
     required this.status,
     required this.isConnected,
     required this.deviceId,
-    this.gpsEnabled = false,
+    this.autoPushEnabled = false,
     this.gpsPoint,
     this.deviceName,
     this.onShowScanDialog,
     this.onRecordControl,
+    this.onGpsToggle,
     this.onModeSelected,
   });
 
@@ -186,10 +188,11 @@ class StatusTilesGrid extends StatelessWidget {
           value: l10n.sleep,
           iconColor: Colors.orange,
         ),
-      // GPS tile
-      _GpsTile(
-        enabled: gpsEnabled,
+      // GPS tile (clickable toggle)
+      _GpsToggleTile(
+        autoPushEnabled: autoPushEnabled,
         gpsPoint: gpsPoint,
+        onTap: onGpsToggle,
         l10n: l10n,
       ),
       // User mode (custom mode) - show only when in custom mode
@@ -551,15 +554,17 @@ class _RecordControlTile extends StatelessWidget {
   }
 }
 
-/// GPS data tile - shows GPS coordinates when enabled.
-class _GpsTile extends StatelessWidget {
-  final bool enabled;
+/// GPS toggle tile - shows GPS status and allows toggling auto-push.
+class _GpsToggleTile extends StatelessWidget {
+  final bool autoPushEnabled;
   final GpsPointModel? gpsPoint;
+  final VoidCallback? onTap;
   final AppLocalizations l10n;
 
-  const _GpsTile({
-    required this.enabled,
+  const _GpsToggleTile({
+    required this.autoPushEnabled,
     this.gpsPoint,
+    this.onTap,
     required this.l10n,
   });
 
@@ -572,28 +577,71 @@ class _GpsTile extends StatelessWidget {
     String value;
     Color? iconColor;
 
-    if (!enabled) {
+    if (!autoPushEnabled) {
+      // GPS push disabled
       iconData = Icons.location_off;
       label = 'GPS';
-      value = l10n.gpsNotEnabled;
+      value = l10n.pushDisabled;
       iconColor = theme.colorScheme.onSurfaceVariant;
     } else if (gpsPoint == null) {
+      // GPS push enabled but acquiring
       iconData = Icons.location_searching;
       label = 'GPS';
       value = l10n.gpsAcquiring;
       iconColor = theme.colorScheme.primary;
     } else {
+      // GPS push enabled and location acquired
       iconData = Icons.location_on;
-      label = gpsPoint!.latitude.toStringAsFixed(4);
-      value = gpsPoint!.longitude.toStringAsFixed(4);
+      label = 'GPS';
+      value = l10n.pushEnabled;
       iconColor = theme.colorScheme.primary;
     }
 
-    return StatusTile(
-      icon: iconData,
-      label: label,
-      value: value,
-      iconColor: iconColor,
+    // Show toggle indicator when auto-push is enabled
+    final showActive = autoPushEnabled;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: showActive
+              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
+              : theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+          border: showActive
+              ? Border.all(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                )
+              : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              iconData,
+              size: 24,
+              color: iconColor,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              value,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontSize: 10,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
