@@ -20,6 +20,7 @@ class StatusTilesGrid extends StatelessWidget {
   final VoidCallback? onShowScanDialog;
   final VoidCallback? onRecordControl;
   final VoidCallback? onGpsToggle;
+  final VoidCallback? onSettings;
   final void Function(int mode)? onModeSelected;
 
   const StatusTilesGrid({
@@ -33,6 +34,7 @@ class StatusTilesGrid extends StatelessWidget {
     this.onShowScanDialog,
     this.onRecordControl,
     this.onGpsToggle,
+    this.onSettings,
     this.onModeSelected,
   });
 
@@ -46,6 +48,7 @@ class StatusTilesGrid extends StatelessWidget {
       children: [
         // Remaining small tiles in 4-column grid
         GridView.count(
+          padding: EdgeInsets.zero,
           crossAxisCount: 4,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -54,7 +57,9 @@ class StatusTilesGrid extends StatelessWidget {
           childAspectRatio: 1.0,
           children: _buildSmallTiles(theme, l10n),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(
+          height: 8,
+        ),
         // First row: Mode selector (2x2) + 2 small tiles
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,6 +134,11 @@ class StatusTilesGrid extends StatelessWidget {
             ? theme.colorScheme.error
             : theme.colorScheme.primary,
       ),
+      // Settings tile (clickable)
+      _SettingsTile(
+        onTap: onSettings,
+        l10n: l10n,
+      ),
       // Remaining recording time
       StatusTile(
         icon: Icons.timer_outlined,
@@ -166,7 +176,9 @@ class StatusTilesGrid extends StatelessWidget {
       StatusTile(
         icon: Icons.device_thermostat_outlined,
         label: l10n.temperature,
-        value: isConnected ? (status.isOverheating ? l10n.overheating : l10n.normal) : placeholder,
+        value: isConnected
+            ? (status.isOverheating ? l10n.overheating : l10n.normal)
+            : placeholder,
         iconColor: isConnected && status.isOverheating
             ? theme.colorScheme.error
             : theme.colorScheme.primary,
@@ -225,6 +237,7 @@ class StatusTilesGrid extends StatelessWidget {
           label: l10n.timelapseInterval,
           value: status.timelapseIntervalDisplay,
         ),
+      const SizedBox()
     ];
   }
 
@@ -446,9 +459,8 @@ class _ConnectionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final iconData = isConnected
-        ? Icons.bluetooth_connected
-        : Icons.bluetooth_disabled;
+    final iconData =
+        isConnected ? Icons.bluetooth_connected : Icons.bluetooth_disabled;
     final label = isConnected ? deviceName : l10n.disconnected;
     final iconColor = isConnected
         ? theme.colorScheme.primary
@@ -509,7 +521,8 @@ class _RecordControlTile extends StatelessWidget {
     final iconData = isRecording
         ? Icons.stop_circle
         : (isPhotoMode ? Icons.camera_alt : Icons.fiber_manual_record);
-    final label = isRecording ? l10n.stop : (isPhotoMode ? l10n.photo : l10n.record);
+    final label =
+        isRecording ? l10n.stop : (isPhotoMode ? l10n.photo : l10n.record);
 
     final bgColor = enabled
         ? (isRecording
@@ -636,6 +649,51 @@ class _GpsToggleTile extends StatelessWidget {
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontSize: 10,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Settings tile - clickable tile to navigate to settings page.
+class _SettingsTile extends StatelessWidget {
+  final VoidCallback? onTap;
+  final AppLocalizations l10n;
+
+  const _SettingsTile({
+    this.onTap,
+    required this.l10n,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.settings_outlined,
+              size: 24,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              l10n.settings,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
             ),

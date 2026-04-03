@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:osmo_control/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/session_provider.dart';
@@ -51,12 +53,17 @@ class _WorkbenchViewState extends State<WorkbenchView> {
     final gps = context.watch<GpsProvider>();
     final device = session.connectedDevice;
     final status = session.cameraStatus;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
+      appBar: AppBar(
+          title: Text(
+        l10n.aboutAppTitle,
+      )),
       body: RefreshIndicator(
         onRefresh: () async => session.requestVersion(),
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           children: [
             // Status tiles grid with integrated mode selector
             StatusTilesGrid(
@@ -70,6 +77,7 @@ class _WorkbenchViewState extends State<WorkbenchView> {
               onRecordControl: () => _onRecordControl(session),
               onModeSelected: (mode) => session.switchMode(mode),
               onGpsToggle: () => gps.setAutoPushEnabled(!gps.autoPushEnabled),
+              onSettings: () => context.push('/settings'),
             ),
           ],
         ),

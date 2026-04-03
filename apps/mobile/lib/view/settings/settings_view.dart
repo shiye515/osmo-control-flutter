@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../l10n/app_localizations.dart';
@@ -16,7 +17,14 @@ class SettingsView extends StatelessWidget {
       appBar: AppBar(title: Text(l10n.settings)),
       body: ListView(
         children: [
+          // Debug section
           _SectionHeader(title: l10n.debugSection),
+          ListTile(
+            leading: const Icon(Icons.bug_report_outlined),
+            title: Text(l10n.debugConsole),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/debug'),
+          ),
           SwitchListTile(
             title: Text(l10n.simulateDeviceMode),
             subtitle: Text(l10n.simulateDeviceModeDescription),
@@ -25,17 +33,17 @@ class SettingsView extends StatelessWidget {
             onChanged: session.enableFakeMode,
           ),
           const Divider(),
+          // About section using AboutListTile
           _SectionHeader(title: l10n.aboutSection),
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: Text(l10n.aboutAppTitle),
-            subtitle: Text(l10n.aboutAppSubtitle),
-          ),
-          ListTile(
-            leading: const Icon(Icons.code),
-            title: Text(l10n.openSourceLicenses),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+          AboutListTile(
+            icon: const Icon(Icons.info_outline),
+            applicationName: l10n.aboutAppTitle,
+            applicationVersion: 'v1.0.0',
+            applicationLegalese: '© 2026 Osmo Controller',
+            aboutBoxChildren: [
+              const SizedBox(height: 16),
+              Text(l10n.aboutAppSubtitle),
+            ],
           ),
         ],
       ),
