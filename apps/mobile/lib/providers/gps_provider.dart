@@ -12,18 +12,14 @@ class GpsProvider extends ChangeNotifier {
 
   GpsPointModel? _lastGpsPoint;
   bool _autoPushEnabled = false;
-  int _pushIntervalSec = 2;  // Changed from Hz to seconds (2, 5, 10)
-  Timer? _autoPushTimer;
 
   bool _gpsEnabled = false;
   StreamSubscription? _locationSubscription;
 
   static const _kGpsEnabledKey = 'gps_enabled';
-  static const _kPushIntervalKey = 'push_interval_sec';
 
   GpsPointModel? get lastGpsPoint => _lastGpsPoint;
   bool get autoPushEnabled => _autoPushEnabled;
-  int get pushIntervalSec => _pushIntervalSec;
   bool get gpsEnabled => _gpsEnabled;
 
   void updateSession(SessionProvider session) {
@@ -88,6 +84,11 @@ class GpsProvider extends ChangeNotifier {
         timestamp: position.timestamp,
       );
       notifyListeners();
+
+      // Real-time push: push GPS data immediately when received and auto-push is enabled
+      if (_autoPushEnabled) {
+        _sessionProvider?.pushGps(_lastGpsPoint!);
+      }
     });
     return true;
   }
@@ -110,51 +111,12 @@ class GpsProvider extends ChangeNotifier {
       if (!_gpsEnabled) {
         await setGpsEnabled(true);
       }
-      _startAutoPush();
-    } else {
-      _stopAutoPush();
-      // Keep GPS running for position display
+      // Push current location immediately if available
+      if (_lastGpsPoint != null) {
+        _sessionProvider?.pushGps(_lastGpsPoint!);
+      }
     }
     notifyListeners();
-  }
-
-  void setPushIntervalSec(int seconds) {
-    _pushIntervalSec = seconds;
-    if (_autoPushEnabled) {
-      _stopAutoPush();
-      _startAutoPush();
-    }
-    notifyListeners();
-  }
-
-  Future<void> loadPushIntervalState() async {
-    final prefs = await SharedPreferences.getInstance();
-    _pushIntervalSec = prefs.getInt(_kPushIntervalKey) ?? 2;
-    notifyListeners();
-  }
-
-  Future<void> savePushIntervalState() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_kPushIntervalKey, _pushIntervalSec);
-  }
-
-  void _startAutoPush() {
-    _stopAutoPush();
-    // Use seconds interval (2, 5, or 10 seconds)
-    final intervalSec = _pushIntervalSec.clamp(1, 60);
-    _autoPushTimer = Timer.periodic(
-        Duration(seconds: intervalSec), (_) => _pushCurrentLocation());
-  }
-
-  void _stopAutoPush() {
-    _autoPushTimer?.cancel();
-    _autoPushTimer = null;
-  }
-
-  Future<void> _pushCurrentLocation() async {
-    final point = _lastGpsPoint;
-    if (point == null) return;
-    await _sessionProvider?.pushGps(point);
   }
 
   Future<void> pushGpsNow(double lat, double lng, double alt) async {
@@ -174,7 +136,6 @@ class GpsProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    _stopAutoPush();
     _stopLocationStream();
     super.dispose();
   }

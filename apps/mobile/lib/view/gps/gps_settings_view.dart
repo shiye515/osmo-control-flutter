@@ -46,31 +46,9 @@ class GpsSettingsView extends StatelessWidget {
                       subtitle: Text(l10n.autoPushDescription),
                       value: gps.autoPushEnabled,
                       onChanged: (value) async {
-                        if (value) {
-                          gps.setAutoPushEnabled(true);
-                        } else {
-                          gps.setAutoPushEnabled(false);
-                        }
+                        gps.setAutoPushEnabled(value);
                       },
                       contentPadding: EdgeInsets.zero,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.pushInterval,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    SegmentedButton<int>(
-                      segments: [
-                        ButtonSegment(value: 2, label: Text(l10n.interval2s)),
-                        ButtonSegment(value: 5, label: Text(l10n.interval5s)),
-                        ButtonSegment(value: 10, label: Text(l10n.interval10s)),
-                      ],
-                      selected: {gps.pushIntervalSec},
-                      onSelectionChanged: (Set<int> selection) {
-                        gps.setPushIntervalSec(selection.first);
-                        gps.savePushIntervalState();
-                      },
                     ),
                   ],
                 ),
