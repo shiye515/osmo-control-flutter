@@ -270,4 +270,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notAvailable => '--';
+
+  @override
+  String get userMode => 'User Mode';
+
+  @override
+  String get remainingPhotos => 'Photos';
+
+  @override
+  String get loopRecording => 'Loop';
+
+  @override
+  String get photoCountdown => 'Countdown';
+
+  @override
+  String get timelapseInterval => 'Interval';
 }

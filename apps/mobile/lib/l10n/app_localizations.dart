@@ -610,6 +610,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'--'**
   String get notAvailable;
+
+  /// User mode tile label
+  ///
+  /// In en, this message translates to:
+  /// **'User Mode'**
+  String get userMode;
+
+  /// Remaining photo count tile label
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get remainingPhotos;
+
+  /// Loop recording tile label
+  ///
+  /// In en, this message translates to:
+  /// **'Loop'**
+  String get loopRecording;
+
+  /// Photo countdown tile label
+  ///
+  /// In en, this message translates to:
+  /// **'Countdown'**
+  String get photoCountdown;
+
+  /// Timelapse interval tile label
+  ///
+  /// In en, this message translates to:
+  /// **'Interval'**
+  String get timelapseInterval;
 }
 
 class _AppLocalizationsDelegate

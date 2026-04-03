@@ -266,6 +266,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notAvailable => '--';
+
+  @override
+  String get userMode => '用户模式';
+
+  @override
+  String get remainingPhotos => '剩余张数';
+
+  @override
+  String get loopRecording => '循环录像';
+
+  @override
+  String get photoCountdown => '拍照倒计时';
+
+  @override
+  String get timelapseInterval => '延时间隔';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -530,4 +545,19 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get notAvailable => '--';
+
+  @override
+  String get userMode => '使用者模式';
+
+  @override
+  String get remainingPhotos => '剩餘張數';
+
+  @override
+  String get loopRecording => '循環錄製';
+
+  @override
+  String get photoCountdown => '拍照倒數';
+
+  @override
+  String get timelapseInterval => '延時間隔';
 }

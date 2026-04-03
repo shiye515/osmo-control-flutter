@@ -262,4 +262,71 @@ class CameraStatusModel {
 
   /// Is sleeping
   bool get isSleeping => powerMode == 3;
+
+  /// User mode display name (e.g., "Custom 1" or "通用模式")
+  String get userModeDisplay {
+    switch (userMode) {
+      case 0: return '通用';
+      case 1: return '自定义1';
+      case 2: return '自定义2';
+      case 3: return '自定义3';
+      case 4: return '自定义4';
+      case 5: return '自定义5';
+      default: return '通用';
+    }
+  }
+
+  /// Whether user mode is custom (not default)
+  bool get isCustomUserMode => userMode > 0 && userMode <= 5;
+
+  /// Remaining photo count display (e.g., "1500")
+  String get remainPhotoDisplay => remainPhotoNum.toString();
+
+  /// Loop recording duration display (e.g., "5m", "1h", "MAX", "OFF")
+  String get loopRecordDisplay {
+    if (loopRecordSecs == 0) return 'OFF';
+    if (loopRecordSecs == 65535) return 'MAX';
+    final minutes = loopRecordSecs ~/ 60;
+    if (minutes >= 60) return '${minutes ~/ 60}h';
+    return '${minutes}m';
+  }
+
+  /// Whether loop recording is enabled
+  bool get isLoopRecordingEnabled => loopRecordSecs > 0;
+
+  /// Photo countdown display in seconds (e.g., "5s")
+  String get photoCountdownDisplay {
+    if (photoCountdownMs == 0) return '';
+    final seconds = photoCountdownMs ~/ 1000;
+    return '${seconds}s';
+  }
+
+  /// Whether photo countdown is active
+  bool get isPhotoCountdownActive => photoCountdownMs > 0;
+
+  /// Timelapse interval display (e.g., "5.0s", "Auto")
+  String get timelapseIntervalDisplay {
+    if (timelapseInterval == 0) return 'Auto';
+    final seconds = timelapseInterval / 10; // Unit: 0.1 second
+    return '${seconds.toStringAsFixed(1)}s';
+  }
+
+  /// Timelapse duration display (e.g., "2h30m")
+  String get timelapseDurationDisplay {
+    final hours = timelapseDuration ~/ 3600;
+    final minutes = (timelapseDuration % 3600) ~/ 60;
+    if (hours > 0) {
+      return '${hours}h${minutes}m';
+    }
+    return '${minutes}m';
+  }
+
+  /// Whether camera is in timelapse mode
+  bool get isTimelapseMode => cameraMode == 0x02 || cameraMode == 0x0A;
+
+  /// Whether camera is in photo mode
+  bool get isPhotoMode => cameraMode == 0x05;
+
+  /// Whether camera is in video mode
+  bool get isVideoMode => cameraMode == 0x01 || cameraMode == 0x28; // Video or Low Light Video
 }

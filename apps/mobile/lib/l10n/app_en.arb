@@ -349,5 +349,25 @@
   "notAvailable": "--",
   "@notAvailable": {
     "description": "Placeholder for unavailable data"
+  },
+  "userMode": "User Mode",
+  "@userMode": {
+    "description": "User mode tile label"
+  },
+  "remainingPhotos": "Photos",
+  "@remainingPhotos": {
+    "description": "Remaining photo count tile label"
+  },
+  "loopRecording": "Loop",
+  "@loopRecording": {
+    "description": "Loop recording tile label"
+  },
+  "photoCountdown": "Countdown",
+  "@photoCountdown": {
+    "description": "Photo countdown tile label"
+  },
+  "timelapseInterval": "Interval",
+  "@timelapseInterval": {
+    "description": "Timelapse interval tile label"
   }
 }

@@ -84,5 +84,10 @@
   "verticalAccuracy": "垂直精度",
   "speedAccuracy": "速度精度",
   "satelliteCount": "衛星數量",
-  "notAvailable": "--"
+  "notAvailable": "--",
+  "userMode": "使用者模式",
+  "remainingPhotos": "剩餘張數",
+  "loopRecording": "循環錄製",
+  "photoCountdown": "拍照倒數",
+  "timelapseInterval": "延時間隔"
 }

@@ -192,6 +192,36 @@ class StatusTilesGrid extends StatelessWidget {
         gpsPoint: gpsPoint,
         l10n: l10n,
       ),
+      // User mode (custom mode) - show only when in custom mode
+      if (isConnected && status.isCustomUserMode)
+        StatusTile(
+          icon: Icons.tune,
+          label: l10n.userMode,
+          value: status.userModeDisplay,
+          iconColor: theme.colorScheme.tertiary,
+        ),
+      // Remaining photos - show only in photo mode
+      if (isConnected && status.isPhotoMode)
+        StatusTile(
+          icon: Icons.photo_library_outlined,
+          label: l10n.remainingPhotos,
+          value: status.remainPhotoDisplay,
+        ),
+      // Loop recording - show only in video mode when enabled
+      if (isConnected && status.isVideoMode && status.isLoopRecordingEnabled)
+        StatusTile(
+          icon: Icons.loop,
+          label: l10n.loopRecording,
+          value: status.loopRecordDisplay,
+          iconColor: theme.colorScheme.tertiary,
+        ),
+      // Timelapse interval - show only in timelapse mode
+      if (isConnected && status.isTimelapseMode)
+        StatusTile(
+          icon: Icons.timelapse,
+          label: l10n.timelapseInterval,
+          value: status.timelapseIntervalDisplay,
+        ),
     ];
   }
 

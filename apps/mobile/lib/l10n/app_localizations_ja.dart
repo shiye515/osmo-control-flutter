@@ -266,4 +266,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get notAvailable => '--';
+
+  @override
+  String get userMode => 'ユーザーモード';
+
+  @override
+  String get remainingPhotos => '撮影可能';
+
+  @override
+  String get loopRecording => 'ループ';
+
+  @override
+  String get photoCountdown => 'カウントダウン';
+
+  @override
+  String get timelapseInterval => '間隔';
 }
