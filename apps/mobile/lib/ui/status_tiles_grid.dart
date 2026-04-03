@@ -97,7 +97,7 @@ class StatusTilesGrid extends StatelessWidget {
   }
 
   List<Widget> _buildSmallTiles(ThemeData theme, AppLocalizations l10n) {
-    final placeholder = '--';
+    const placeholder = '--';
 
     return [
       AspectRatio(
@@ -554,8 +554,8 @@ class _GpsTile extends StatelessWidget {
       iconColor = theme.colorScheme.primary;
     } else {
       iconData = Icons.location_on;
-      label = '${gpsPoint!.latitude.toStringAsFixed(4)}';
-      value = '${gpsPoint!.longitude.toStringAsFixed(4)}';
+      label = gpsPoint!.latitude.toStringAsFixed(4);
+      value = gpsPoint!.longitude.toStringAsFixed(4);
       iconColor = theme.colorScheme.primary;
     }
 

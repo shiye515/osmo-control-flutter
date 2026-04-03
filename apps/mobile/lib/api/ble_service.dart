@@ -24,7 +24,6 @@ class BleService {
   final Map<String, ScanResultModel> _discovered = {};
   BluetoothDevice? _connectedDevice;
   BluetoothCharacteristic? _writeCharacteristic;
-  BluetoothCharacteristic? _notifyCharacteristic;
 
   StreamController<List<int>>? _notifyController;
   Stream<List<int>>? get notifyStream => _notifyController?.stream;
@@ -103,7 +102,6 @@ class BleService {
             if (isWrite) {
               _writeCharacteristic = char;
             } else if (isNotify) {
-              _notifyCharacteristic = char;
               await char.setNotifyValue(true);
               _notifyController = StreamController<List<int>>.broadcast();
               _notifySubscription = char.lastValueStream.listen(_onDataReceived);
@@ -322,7 +320,6 @@ class BleService {
     await _connectedDevice?.disconnect();
     _connectedDevice = null;
     _writeCharacteristic = null;
-    _notifyCharacteristic = null;
     _notifyController?.close();
     _notifyController = null;
     _frameBuffer.clear();
