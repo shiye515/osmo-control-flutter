@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/gps_point_model.dart';
@@ -7,6 +8,8 @@ import '../services/location_service.dart';
 import 'session_provider.dart';
 
 class GpsProvider extends ChangeNotifier {
+  static final _log = Logger('GpsProvider');
+
   SessionProvider? _sessionProvider;
   LocationService? _locationService;
 
@@ -15,6 +18,14 @@ class GpsProvider extends ChangeNotifier {
 
   bool _gpsEnabled = false;
   StreamSubscription? _locationSubscription;
+
+  // Throttle control
+  DateTime? _lastPushTime;
+  static const _minPushIntervalMs = 500; // 0.5秒 (2Hz max)
+
+  // Failure tracking
+  int _consecutivePushFailures = 0;
+  static const _maxConsecutiveFailures = 3;
 
   static const _kGpsEnabledKey = 'gps_enabled';
 
@@ -85,12 +96,28 @@ class GpsProvider extends ChangeNotifier {
       );
       notifyListeners();
 
-      // Real-time push: push GPS data immediately when received and auto-push is enabled
-      if (_autoPushEnabled) {
-        _sessionProvider?.pushGps(_lastGpsPoint!);
+      // Real-time push with throttle: push GPS data when auto-push is enabled and throttle allows
+      if (_autoPushEnabled && _shouldPush()) {
+        _sessionProvider?.pushGps(_lastGpsPoint!).then((success) {
+          if (success) {
+            _consecutivePushFailures = 0;
+          } else {
+            _consecutivePushFailures++;
+            if (_consecutivePushFailures >= _maxConsecutiveFailures) {
+              _log.warning('GPS push consecutive failures: $_consecutivePushFailures');
+            }
+          }
+        });
+        _lastPushTime = DateTime.now();
       }
     });
     return true;
+  }
+
+  /// Check if throttle allows a new push.
+  bool _shouldPush() {
+    if (_lastPushTime == null) return true;
+    return DateTime.now().difference(_lastPushTime!).inMilliseconds >= _minPushIntervalMs;
   }
 
   void _stopLocationStream() {
@@ -104,15 +131,16 @@ class GpsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setAutoPushEnabled(bool enabled) async {
+  Future<void> setAutoPushEnabled(bool enabled) async {
     _autoPushEnabled = enabled;
     if (enabled) {
       // Auto-start GPS when enabling auto-push
       if (!_gpsEnabled) {
         await setGpsEnabled(true);
       }
-      // Push current location immediately if available
-      if (_lastGpsPoint != null) {
+      // Push current location immediately if available (bypass throttle for first push)
+      if (_lastGpsPoint != null && _shouldPush()) {
+        _lastPushTime = DateTime.now();
         _sessionProvider?.pushGps(_lastGpsPoint!);
       }
     }

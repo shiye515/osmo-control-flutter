@@ -282,6 +282,9 @@ class DjiRProtocol {
 
   /// Build GPS data push command (CmdSet=0x00, CmdID=0x17).
   /// Payload is 48 bytes with date/time, position, speed, accuracy, and satellite count.
+  ///
+  /// Note: [timestamp] should be local time (e.g. DateTime.now()).
+  /// The DJI protocol requires UTC+8 timezone, so hour is adjusted by +8.
   static List<int> buildPushGps({
     required DateTime timestamp,
     required double latitude,

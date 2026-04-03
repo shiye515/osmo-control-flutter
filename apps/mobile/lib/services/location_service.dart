@@ -84,19 +84,16 @@ class LocationService {
   }
 
   /// Start continuous position updates.
-  /// Returns stream subscription.
-  Future<void> startPositionStream({
-    int distanceFilter = 0,
-    int intervalMs = 1000,
-  }) async {
+  /// distanceFilter: minimum distance (meters) before triggering update, 0 for real-time.
+  Future<void> startPositionStream({int distanceFilter = 0}) async {
     final hasPermission = await ensurePermission();
     if (!hasPermission) return;
 
     await stopPositionStream();
 
-    const locationSettings = LocationSettings(
+    final locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 0,
+      distanceFilter: distanceFilter,
     );
 
     _positionSubscription = Geolocator.getPositionStream(

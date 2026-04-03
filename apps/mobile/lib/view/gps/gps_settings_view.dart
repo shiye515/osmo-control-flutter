@@ -46,7 +46,7 @@ class GpsSettingsView extends StatelessWidget {
                       subtitle: Text(l10n.autoPushDescription),
                       value: gps.autoPushEnabled,
                       onChanged: (value) async {
-                        gps.setAutoPushEnabled(value);
+                        await gps.setAutoPushEnabled(value);
                       },
                       contentPadding: EdgeInsets.zero,
                     ),

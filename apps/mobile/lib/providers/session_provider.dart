@@ -234,12 +234,14 @@ class SessionProvider extends ChangeNotifier {
     await _bleProvider?.subscribeCameraStatus();
   }
 
-  Future<void> pushGps(GpsPointModel gpsPoint) async {
-    if (!isConnected && !_isFakeMode) return;
+  /// Push GPS data to camera.
+  /// Returns true if push succeeded, false otherwise.
+  Future<bool> pushGps(GpsPointModel gpsPoint) async {
+    if (!isConnected && !_isFakeMode) return false;
     if (_isFakeMode) {
       _addLog(LogDirection.system,
           '[Fake] GPS push: ${gpsPoint.latitude}, ${gpsPoint.longitude}, ${gpsPoint.altitude}');
-      return;
+      return true;
     }
 
     // Handle unavailable speed (geolocator returns -1)
@@ -274,6 +276,7 @@ class SessionProvider extends ChangeNotifier {
     } else {
       _addLog(LogDirection.system, 'GPS push failed');
     }
+    return success == true;
   }
 
   Future<void> disconnect() async {
