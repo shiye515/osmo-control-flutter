@@ -290,6 +290,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pushEnabled => '推送已开启';
+
+  @override
+  String get wake => '唤醒';
+
+  @override
+  String get wakeNotSupportedOnIos => 'iOS 不支持唤醒功能，请手动按相机电源键';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -578,4 +584,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get pushEnabled => '推送已開啟';
+
+  @override
+  String get wake => '喚醒';
+
+  @override
+  String get wakeNotSupportedOnIos => 'iOS 不支援喚醒功能，請手動按相機電源鍵';
 }

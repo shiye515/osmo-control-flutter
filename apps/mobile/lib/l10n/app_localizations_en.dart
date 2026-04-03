@@ -294,4 +294,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pushEnabled => 'Push Enabled';
+
+  @override
+  String get wake => 'Wake';
+
+  @override
+  String get wakeNotSupportedOnIos =>
+      'Wake not supported on iOS. Please press camera power button manually.';
 }

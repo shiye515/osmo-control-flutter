@@ -36,7 +36,6 @@ class SessionProvider extends ChangeNotifier {
   bool get isConnected => _connectedDevice?.isConnected ?? false;
   bool get isAuthenticated => _connectedDevice?.isAuthenticated ?? false;
   int get powerMode => _bleProvider?.powerMode ?? 0;
-  bool get isSleeping => powerMode == 3;
   int get cameraDeviceId => _bleProvider?.cameraDeviceId ?? 0;
   ({String id, String name})? get rememberedDevice => _rememberedDevice;
   String? get userDisconnectedDeviceId => _userDisconnectedDeviceId;
@@ -102,7 +101,7 @@ class SessionProvider extends ChangeNotifier {
     _powerModeSubscription?.cancel();
     _powerModeSubscription =
         _bleProvider?.powerModeStream.listen((mode) {
-          _log.info('Power mode changed: $mode (${mode == 3 ? "sleep" : "normal"})');
+          _log.info('Power mode changed: $mode');
           notifyListeners();
         });
 
@@ -197,36 +196,6 @@ class SessionProvider extends ChangeNotifier {
       _addLog(LogDirection.system, 'Switch mode command sent: 0x${mode.toRadixString(16)}');
     } else {
       _addLog(LogDirection.system, 'Failed to send switch mode command');
-    }
-  }
-
-  Future<void> sleep() async {
-    if (!isConnected && !_isFakeMode) return;
-    if (_isFakeMode) {
-      _addLog(LogDirection.system, '[Fake] Sleep');
-      return;
-    }
-    _log.info('=== Sending sleep command ===');
-    final success = await _bleProvider?.sendSleepCommand() ?? false;
-    if (success) {
-      _addLog(LogDirection.system, 'Sleep command sent');
-    } else {
-      _addLog(LogDirection.system, 'Failed to send sleep command');
-    }
-  }
-
-  Future<void> wake() async {
-    if (!isConnected && !_isFakeMode) return;
-    if (_isFakeMode) {
-      _addLog(LogDirection.system, '[Fake] Wake');
-      return;
-    }
-    _log.info('=== Sending wake command ===');
-    final success = await _bleProvider?.sendWakeCommand() ?? false;
-    if (success) {
-      _addLog(LogDirection.system, 'Wake command sent');
-    } else {
-      _addLog(LogDirection.system, 'Failed to send wake command');
     }
   }
 

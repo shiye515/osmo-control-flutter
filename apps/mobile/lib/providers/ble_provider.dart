@@ -82,16 +82,6 @@ class BleProvider extends ChangeNotifier {
   /// Stream of camera status changes.
   Stream<CameraStatusModel> get cameraStatusStream => _bleService.cameraStatusStream;
 
-  /// Send sleep command to camera.
-  Future<bool> sendSleepCommand() async {
-    return _bleService.sendSleepCommand();
-  }
-
-  /// Send wake command to camera.
-  Future<bool> sendWakeCommand() async {
-    return _bleService.sendWakeCommand();
-  }
-
   /// Request camera status push.
   Future<bool> requestCameraStatus() async {
     return _bleService.requestCameraStatus();
@@ -145,11 +135,6 @@ class BleProvider extends ChangeNotifier {
       speedAccuracy: speedAccuracy,
       satelliteCount: satelliteCount,
     );
-  }
-
-  /// Generate wake-up advertisement data for a sleeping camera.
-  static List<int> getWakeUpAdvData(String macAddress) {
-    return BleService.getWakeUpAdvData(macAddress);
   }
 
   @override

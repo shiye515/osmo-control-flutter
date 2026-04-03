@@ -381,5 +381,13 @@
   "pushEnabled": "Push Enabled",
   "@pushEnabled": {
     "description": "GPS push enabled status"
+  },
+  "wake": "Wake",
+  "@wake": {
+    "description": "Wake camera button"
+  },
+  "wakeNotSupportedOnIos": "Wake not supported on iOS. Please press camera power button manually.",
+  "@wakeNotSupportedOnIos": {
+    "description": "Wake not supported message for iOS"
   }
 }

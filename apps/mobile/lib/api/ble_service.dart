@@ -12,14 +12,13 @@ class BleService {
 
   StreamSubscription<List<ScanResult>>? _scanSubscription;
   StreamSubscription<BluetoothAdapterState>? _adapterSubscription;
+  StreamSubscription<BluetoothConnectionState>? _connectionSubscription;
 
   final _scanResultsController =
       StreamController<List<ScanResultModel>>.broadcast();
-  final _connectionStateController = StreamController<bool>.broadcast();
 
   Stream<List<ScanResultModel>> get scanResults =>
       _scanResultsController.stream;
-  Stream<bool> get connectionStateStream => _connectionStateController.stream;
 
   final Map<String, ScanResultModel> _discovered = {};
   BluetoothDevice? _connectedDevice;
@@ -117,16 +116,23 @@ class BleService {
         return false;
       }
 
+      // Listen for disconnect events
+      _connectionSubscription?.cancel();
+      _connectionSubscription = device.connectionState.listen((state) {
+        if (state == BluetoothConnectionState.disconnected) {
+          _log.info('Device disconnected: $deviceId');
+          _onDeviceDisconnected();
+        }
+      });
+
       if (useDjiRAuth) {
         return await _performDjiRAuth();
       } else {
-        _connectionStateController.add(true);
         _log.info('Connected to $deviceId');
         return true;
       }
     } catch (e) {
       _log.warning('Connect failed: $e');
-      _connectionStateController.add(false);
       return false;
     }
   }
@@ -150,7 +156,6 @@ class BleService {
     final writeSuccess = await _writeFrame(frame);
     if (!writeSuccess) {
       _log.warning('Failed to write connection request');
-      _connectionStateController.add(false);
       return false;
     }
 
@@ -158,7 +163,6 @@ class BleService {
       const Duration(seconds: 10),
       onTimeout: () {
         _log.warning('Auth timeout');
-        _connectionStateController.add(false);
         return false;
       },
     );
@@ -257,14 +261,12 @@ class BleService {
         );
         _writeFrame(ackFrame).then((_) {
           _log.info('Connected to camera');
-          _connectionStateController.add(true);
           _authCompleter?.complete(true);
           // Subscribe to status push after connection
           subscribeCameraStatus();
         });
       } else {
         _log.warning('Camera rejected connection');
-        _connectionStateController.add(false);
         _authCompleter?.complete(false);
       }
     }
@@ -315,6 +317,8 @@ class BleService {
   }
 
   Future<void> disconnect() async {
+    await _connectionSubscription?.cancel();
+    _connectionSubscription = null;
     await _notifySubscription?.cancel();
     _notifySubscription = null;
     await _connectedDevice?.disconnect();
@@ -326,7 +330,19 @@ class BleService {
     _cameraDeviceId = 0;
     _powerMode = 0;
     _cameraStatus = const CameraStatusModel();
-    _connectionStateController.add(false);
+  }
+
+  /// Called when device disconnects unexpectedly (not user-initiated).
+  void _onDeviceDisconnected() {
+    _notifySubscription?.cancel();
+    _notifySubscription = null;
+    _writeCharacteristic = null;
+    _connectedDevice = null;
+    _notifyController?.close();
+    _notifyController = null;
+    _frameBuffer.clear();
+    _cameraDeviceId = 0;
+    _cameraStatus = const CameraStatusModel();
   }
 
   /// Write raw data (for DUML protocol commands).
@@ -367,24 +383,6 @@ class BleService {
 
   /// Stream of camera status changes.
   Stream<CameraStatusModel> get cameraStatusStream => _cameraStatusController.stream;
-
-  /// Send sleep command to camera.
-  Future<bool> sendSleepCommand() async {
-    if (_writeCharacteristic == null) return false;
-
-    _log.info('Sending sleep command');
-    final frame = DjiRProtocol.buildSleepCommand();
-    return await _writeFrame(frame);
-  }
-
-  /// Send wake command to camera.
-  Future<bool> sendWakeCommand() async {
-    if (_writeCharacteristic == null) return false;
-
-    _log.info('Sending wake command');
-    final frame = DjiRProtocol.buildWakeCommand();
-    return await _writeFrame(frame);
-  }
 
   /// Request camera status push.
   Future<bool> requestCameraStatus() async {
@@ -463,16 +461,10 @@ class BleService {
     return await _writeFrame(frame);
   }
 
-  /// Generate wake-up advertisement data for a sleeping camera.
-  static List<int> getWakeUpAdvData(String macAddress) {
-    return DjiRProtocol.buildWakeUpAdvData(macAddress);
-  }
-
   void dispose() {
     _scanSubscription?.cancel();
     _adapterSubscription?.cancel();
     _scanResultsController.close();
-    _connectionStateController.close();
     _powerModeController.close();
     _cameraStatusController.close();
     _notifyController?.close();

@@ -92,5 +92,7 @@
   "timelapseInterval": "間隔",
   "disconnect": "切断",
   "pushDisabled": "送信無効",
-  "pushEnabled": "送信有効"
+  "pushEnabled": "送信有効",
+  "wake": "ウェイク",
+  "wakeNotSupportedOnIos": "iOSではウェイク機能に対応していません。カメラの電源ボタンを手動で押してください"
 }

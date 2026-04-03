@@ -192,14 +192,6 @@ class StatusTilesGrid extends StatelessWidget {
             ? theme.colorScheme.error
             : theme.colorScheme.primary,
       ),
-      // Power mode (sleep indicator)
-      if (isConnected && status.isSleeping)
-        StatusTile(
-          icon: Icons.bedtime,
-          label: l10n.power,
-          value: l10n.sleep,
-          iconColor: Colors.orange,
-        ),
       // GPS tile (clickable toggle)
       _GpsToggleTile(
         autoPushEnabled: autoPushEnabled,

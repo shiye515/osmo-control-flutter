@@ -92,5 +92,7 @@
   "timelapseInterval": "延時間隔",
   "disconnect": "中斷連線",
   "pushDisabled": "推送未開啟",
-  "pushEnabled": "推送已開啟"
+  "pushEnabled": "推送已開啟",
+  "wake": "喚醒",
+  "wakeNotSupportedOnIos": "iOS 不支援喚醒功能，請手動按相機電源鍵"
 }

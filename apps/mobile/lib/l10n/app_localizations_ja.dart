@@ -290,4 +290,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get pushEnabled => '送信有効';
+
+  @override
+  String get wake => 'ウェイク';
+
+  @override
+  String get wakeNotSupportedOnIos =>
+      'iOSではウェイク機能に対応していません。カメラの電源ボタンを手動で押してください';
 }

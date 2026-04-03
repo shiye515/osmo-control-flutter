@@ -658,6 +658,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Push Enabled'**
   String get pushEnabled;
+
+  /// Wake camera button
+  ///
+  /// In en, this message translates to:
+  /// **'Wake'**
+  String get wake;
+
+  /// Wake not supported message for iOS
+  ///
+  /// In en, this message translates to:
+  /// **'Wake not supported on iOS. Please press camera power button manually.'**
+  String get wakeNotSupportedOnIos;
 }
 
 class _AppLocalizationsDelegate
