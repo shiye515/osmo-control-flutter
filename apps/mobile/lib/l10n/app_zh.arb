@@ -94,5 +94,17 @@
   "pushDisabled": "推送未开启",
   "pushEnabled": "推送已开启",
   "wake": "唤醒",
-  "wakeNotSupportedOnIos": "iOS 不支持唤醒功能，请手动按相机电源键"
+  "wakeNotSupportedOnIos": "iOS 不支持唤醒功能，请手动按相机电源键",
+  "permissionSection": "权限管理",
+  "permissionBluetooth": "蓝牙",
+  "permissionBluetoothDesc": "连接 Osmo 设备",
+  "permissionLocation": "位置（使用时）",
+  "permissionLocationDesc": "获取 GPS 位置推送到设备",
+  "permissionLocationAlways": "位置（始终）",
+  "permissionLocationAlwaysDesc": "锁屏后继续获取位置",
+  "permissionNotification": "通知",
+  "permissionNotificationDesc": "显示后台服务状态",
+  "permissionRequest": "请求授权",
+  "permissionOpenSettings": "打开设置",
+  "permissionAllRequired": "所有权限都是完整功能所必需的"
 }

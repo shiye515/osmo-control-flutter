@@ -1,13 +1,17 @@
 import 'dart:async';
+import 'dart:io';
+
 import 'package:geolocator/geolocator.dart';
 import 'package:logging/logging.dart';
 
-/// Service for handling device GPS location.
+/// Service for handling device GPS location with background support.
 class LocationService {
   static final _log = Logger('LocationService');
 
   StreamSubscription<Position>? _positionSubscription;
   final _positionController = StreamController<Position>.broadcast();
+
+  bool _backgroundModeEnabled = false;
 
   /// Stream of position updates.
   Stream<Position> get positionStream => _positionController.stream;
@@ -15,6 +19,9 @@ class LocationService {
   /// Current position.
   Position? _currentPosition;
   Position? get currentPosition => _currentPosition;
+
+  /// Whether background mode is enabled.
+  bool get backgroundModeEnabled => _backgroundModeEnabled;
 
   /// Check if location services are enabled.
   Future<bool> isLocationServiceEnabled() async {
@@ -27,16 +34,32 @@ class LocationService {
   }
 
   /// Request location permission.
+  /// If backgroundMode is true, requests 'always' permission.
   /// Returns true if permission granted.
-  Future<bool> requestPermission() async {
-    final permission = await Geolocator.requestPermission();
+  Future<bool> requestPermission({bool backgroundMode = false}) async {
+    LocationPermission permission;
+
+    if (backgroundMode) {
+      // Request always permission for background location
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.whileInUse) {
+        // On iOS, need to request again for always permission
+        if (Platform.isIOS) {
+          permission = await Geolocator.requestPermission();
+        }
+      }
+    } else {
+      permission = await Geolocator.requestPermission();
+    }
+
     return permission == LocationPermission.whileInUse ||
         permission == LocationPermission.always;
   }
 
   /// Ensure location permission is granted.
+  /// If backgroundMode is true, requires 'always' permission.
   /// Returns true if permission is available.
-  Future<bool> ensurePermission() async {
+  Future<bool> ensurePermission({bool backgroundMode = false}) async {
     // Check if location service is enabled
     final serviceEnabled = await isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -60,6 +83,25 @@ class LocationService {
       return false;
     }
 
+    // For background mode, need 'always' permission
+    if (backgroundMode && permission != LocationPermission.always) {
+      if (Platform.isIOS) {
+        // On iOS, request again to get 'always' permission
+        permission = await Geolocator.requestPermission();
+        if (permission != LocationPermission.always) {
+          _log.warning('Always location permission required for background mode');
+          return false;
+        }
+      } else {
+        // On Android, try to request background permission
+        permission = await Geolocator.requestPermission();
+        if (permission != LocationPermission.always) {
+          _log.warning('Background location permission required');
+          return false;
+        }
+      }
+    }
+
     return true;
   }
 
@@ -70,10 +112,7 @@ class LocationService {
 
     try {
       final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          timeLimit: Duration(seconds: 15),
-        ),
+        locationSettings: _buildLocationSettings(),
       );
       _currentPosition = position;
       return position;
@@ -85,19 +124,22 @@ class LocationService {
 
   /// Start continuous position updates.
   /// distanceFilter: minimum distance (meters) before triggering update, 0 for real-time.
-  Future<void> startPositionStream({int distanceFilter = 0}) async {
-    final hasPermission = await ensurePermission();
-    if (!hasPermission) return;
+  /// backgroundMode: if true, enables background location updates.
+  Future<bool> startPositionStream({
+    int distanceFilter = 0,
+    bool backgroundMode = false,
+  }) async {
+    final hasPermission = await ensurePermission(backgroundMode: backgroundMode);
+    if (!hasPermission) return false;
 
     await stopPositionStream();
-
-    final locationSettings = LocationSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: distanceFilter,
-    );
+    _backgroundModeEnabled = backgroundMode;
 
     _positionSubscription = Geolocator.getPositionStream(
-      locationSettings: locationSettings,
+      locationSettings: _buildLocationSettings(
+        distanceFilter: distanceFilter,
+        backgroundMode: backgroundMode,
+      ),
     ).listen(
       (Position position) {
         _currentPosition = position;
@@ -108,13 +150,51 @@ class LocationService {
       },
     );
 
-    _log.info('Started position stream');
+    _log.info('Started position stream (background: $backgroundMode)');
+    return true;
+  }
+
+  /// Build location settings with platform-specific configurations.
+  LocationSettings _buildLocationSettings({
+    int distanceFilter = 0,
+    bool backgroundMode = false,
+  }) {
+    if (Platform.isAndroid) {
+      return AndroidSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: distanceFilter,
+        intervalDuration: const Duration(seconds: 1),
+        foregroundNotificationConfig: backgroundMode
+            ? const ForegroundNotificationConfig(
+                notificationText: '正在获取位置以推送到设备',
+                notificationTitle: 'Osmo 遥控器',
+                enableWakeLock: true,
+                notificationIcon: AndroidResource(name: 'ic_launcher'),
+              )
+            : null,
+      );
+    } else if (Platform.isIOS) {
+      return AppleSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: distanceFilter,
+        activityType: ActivityType.fitness,
+        pauseLocationUpdatesAutomatically: false,
+        showBackgroundLocationIndicator: true,
+        allowBackgroundLocationUpdates: backgroundMode,
+      );
+    }
+
+    return LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: distanceFilter,
+    );
   }
 
   /// Stop position updates.
   Future<void> stopPositionStream() async {
     await _positionSubscription?.cancel();
     _positionSubscription = null;
+    _backgroundModeEnabled = false;
     _log.info('Stopped position stream');
   }
 

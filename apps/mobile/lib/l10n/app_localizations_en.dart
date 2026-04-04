@@ -301,4 +301,42 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get wakeNotSupportedOnIos =>
       'Wake not supported on iOS. Please press camera power button manually.';
+
+  @override
+  String get permissionSection => 'Permissions';
+
+  @override
+  String get permissionBluetooth => 'Bluetooth';
+
+  @override
+  String get permissionBluetoothDesc => 'Connect to Osmo devices';
+
+  @override
+  String get permissionLocation => 'Location (While Using)';
+
+  @override
+  String get permissionLocationDesc => 'Get GPS position for device';
+
+  @override
+  String get permissionLocationAlways => 'Location (Always)';
+
+  @override
+  String get permissionLocationAlwaysDesc =>
+      'Continue GPS in background when screen locked';
+
+  @override
+  String get permissionNotification => 'Notifications';
+
+  @override
+  String get permissionNotificationDesc => 'Show background service status';
+
+  @override
+  String get permissionRequest => 'Request';
+
+  @override
+  String get permissionOpenSettings => 'Open Settings';
+
+  @override
+  String get permissionAllRequired =>
+      'All permissions are required for full functionality';
 }

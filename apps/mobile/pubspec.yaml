@@ -39,6 +39,9 @@ dependencies:
   flutter_image_compress: ^2.4.0
   flutter_blue_plus: ^2.2.1
   geolocator: ^13.0.2
+  flutter_background_service: ^5.0.10
+  flutter_local_notifications: ^18.0.1
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:

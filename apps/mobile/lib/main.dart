@@ -10,11 +10,25 @@ import 'providers/gps_provider.dart';
 import 'providers/debug_provider.dart';
 import 'routes/app_router.dart';
 import 'services/location_service.dart';
+import 'services/permission_service.dart';
+import 'services/background_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   _setupLogging();
+
   final locationService = LocationService();
-  runApp(OsmoControlApp(locationService: locationService));
+  final backgroundService = BackgroundServiceManager.instance;
+  final permissionService = PermissionService();
+
+  // Initialize background service
+  await backgroundService.initialize();
+
+  runApp(OsmoControlApp(
+    locationService: locationService,
+    backgroundService: backgroundService,
+    permissionService: permissionService,
+  ));
 }
 
 void _setupLogging() {
@@ -28,7 +42,15 @@ void _setupLogging() {
 
 class OsmoControlApp extends StatelessWidget {
   final LocationService locationService;
-  const OsmoControlApp({super.key, required this.locationService});
+  final BackgroundServiceManager backgroundService;
+  final PermissionService permissionService;
+
+  const OsmoControlApp({
+    super.key,
+    required this.locationService,
+    required this.backgroundService,
+    required this.permissionService,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +64,7 @@ class OsmoControlApp extends StatelessWidget {
         ChangeNotifierProxyProvider<SessionProvider, GpsProvider>(
           create: (_) => GpsProvider()
             ..setLocationService(locationService)
+            ..setBackgroundService(backgroundService)
             ..loadGpsEnabledState(),
           update: (_, session, gps) => gps!..updateSession(session),
         ),
@@ -49,6 +72,7 @@ class OsmoControlApp extends StatelessWidget {
           create: (_) => DebugProvider(),
           update: (_, session, debug) => debug!..updateSession(session),
         ),
+        ChangeNotifierProvider.value(value: permissionService),
       ],
       child: MaterialApp.router(
         title: 'Osmo 遥控器',

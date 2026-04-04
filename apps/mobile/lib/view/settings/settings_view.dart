@@ -4,9 +4,40 @@ import 'package:provider/provider.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../providers/session_provider.dart';
+import '../../services/permission_service.dart';
+import '../../ui/permission_list_tile.dart';
 
-class SettingsView extends StatelessWidget {
+class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
+
+  @override
+  State<SettingsView> createState() => _SettingsViewState();
+}
+
+class _SettingsViewState extends State<SettingsView> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Initialize permission service
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PermissionService>().initialize();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Refresh permission status when app resumes
+    if (state == AppLifecycleState.resumed) {
+      context.read<PermissionService>().refreshOnResume();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +48,9 @@ class SettingsView extends StatelessWidget {
       appBar: AppBar(title: Text(l10n.settings)),
       body: ListView(
         children: [
+          // Permission section
+          const PermissionSection(),
+          const Divider(),
           // Debug section
           _SectionHeader(title: l10n.debugSection),
           ListTile(

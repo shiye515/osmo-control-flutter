@@ -297,4 +297,40 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get wakeNotSupportedOnIos =>
       'iOSではウェイク機能に対応していません。カメラの電源ボタンを手動で押してください';
+
+  @override
+  String get permissionSection => '権限管理';
+
+  @override
+  String get permissionBluetooth => 'Bluetooth';
+
+  @override
+  String get permissionBluetoothDesc => 'Osmo デバイスに接続';
+
+  @override
+  String get permissionLocation => '位置情報（使用時）';
+
+  @override
+  String get permissionLocationDesc => 'GPS 位置を取得してデバイスに送信';
+
+  @override
+  String get permissionLocationAlways => '位置情報（常に）';
+
+  @override
+  String get permissionLocationAlwaysDesc => '画面ロック時も位置情報を取得';
+
+  @override
+  String get permissionNotification => '通知';
+
+  @override
+  String get permissionNotificationDesc => 'バックグラウンドサービスの状態を表示';
+
+  @override
+  String get permissionRequest => '許可をリクエスト';
+
+  @override
+  String get permissionOpenSettings => '設定を開く';
+
+  @override
+  String get permissionAllRequired => 'すべての権限が必要です';
 }

@@ -35,7 +35,7 @@
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>需要位置权限获取 GPS 数据推送到设备</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs access to location when open.</string>
+	<string>需要位置权限获取 GPS 数据推送到设备</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>

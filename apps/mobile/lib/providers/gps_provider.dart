@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/gps_point_model.dart';
+import '../services/background_service.dart';
 import '../services/location_service.dart';
 import 'session_provider.dart';
 
@@ -12,6 +15,7 @@ class GpsProvider extends ChangeNotifier {
 
   SessionProvider? _sessionProvider;
   LocationService? _locationService;
+  BackgroundServiceManager? _backgroundService;
 
   GpsPointModel? _lastGpsPoint;
   bool _autoPushEnabled = false;
@@ -27,6 +31,9 @@ class GpsProvider extends ChangeNotifier {
   int _consecutivePushFailures = 0;
   static const _maxConsecutiveFailures = 3;
 
+  // Permission denied callback
+  Function? _onPermissionDenied;
+
   static const _kGpsEnabledKey = 'gps_enabled';
 
   GpsPointModel? get lastGpsPoint => _lastGpsPoint;
@@ -39,6 +46,14 @@ class GpsProvider extends ChangeNotifier {
 
   void setLocationService(LocationService service) {
     _locationService = service;
+  }
+
+  void setBackgroundService(BackgroundServiceManager service) {
+    _backgroundService = service;
+  }
+
+  void setOnPermissionDenied(Function callback) {
+    _onPermissionDenied = callback;
   }
 
   Future<void> loadGpsEnabledState() async {
@@ -63,11 +78,23 @@ class GpsProvider extends ChangeNotifier {
         _gpsEnabled = false;
         await prefs.setBool(_kGpsEnabledKey, false);
         notifyListeners();
+        // Notify permission denied
+        _onPermissionDenied?.call();
         return false;
+      }
+
+      // Start background service on Android when GPS is enabled
+      if (Platform.isAndroid && _backgroundService != null) {
+        await _backgroundService!.start();
       }
     } else {
       _stopLocationStream();
       _lastGpsPoint = null;
+
+      // Stop background service on Android when GPS is disabled
+      if (Platform.isAndroid && _backgroundService != null) {
+        await _backgroundService!.stop();
+      }
     }
     notifyListeners();
     return true;
@@ -76,12 +103,19 @@ class GpsProvider extends ChangeNotifier {
   Future<bool> _startLocationStream() async {
     if (_locationService == null) return false;
 
-    final hasPermission = await _locationService!.ensurePermission();
+    // Request background permission (always permission) for background mode
+    final hasPermission = await _locationService!.ensurePermission(backgroundMode: true);
     if (!hasPermission) {
+      _log.warning('Background location permission not granted');
       return false;
     }
 
-    await _locationService!.startPositionStream();
+    // Start position stream with background mode enabled
+    final success = await _locationService!.startPositionStream(backgroundMode: true);
+    if (!success) {
+      return false;
+    }
+
     _locationSubscription = _locationService!.positionStream.listen((position) {
       _lastGpsPoint = GpsPointModel(
         latitude: position.latitude,

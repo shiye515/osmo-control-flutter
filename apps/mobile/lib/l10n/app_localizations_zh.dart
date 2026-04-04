@@ -296,6 +296,42 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get wakeNotSupportedOnIos => 'iOS 不支持唤醒功能，请手动按相机电源键';
+
+  @override
+  String get permissionSection => '权限管理';
+
+  @override
+  String get permissionBluetooth => '蓝牙';
+
+  @override
+  String get permissionBluetoothDesc => '连接 Osmo 设备';
+
+  @override
+  String get permissionLocation => '位置（使用时）';
+
+  @override
+  String get permissionLocationDesc => '获取 GPS 位置推送到设备';
+
+  @override
+  String get permissionLocationAlways => '位置（始终）';
+
+  @override
+  String get permissionLocationAlwaysDesc => '锁屏后继续获取位置';
+
+  @override
+  String get permissionNotification => '通知';
+
+  @override
+  String get permissionNotificationDesc => '显示后台服务状态';
+
+  @override
+  String get permissionRequest => '请求授权';
+
+  @override
+  String get permissionOpenSettings => '打开设置';
+
+  @override
+  String get permissionAllRequired => '所有权限都是完整功能所必需的';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).

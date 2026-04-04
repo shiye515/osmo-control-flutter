@@ -94,5 +94,17 @@
   "pushDisabled": "送信無効",
   "pushEnabled": "送信有効",
   "wake": "ウェイク",
-  "wakeNotSupportedOnIos": "iOSではウェイク機能に対応していません。カメラの電源ボタンを手動で押してください"
+  "wakeNotSupportedOnIos": "iOSではウェイク機能に対応していません。カメラの電源ボタンを手動で押してください",
+  "permissionSection": "権限管理",
+  "permissionBluetooth": "Bluetooth",
+  "permissionBluetoothDesc": "Osmo デバイスに接続",
+  "permissionLocation": "位置情報（使用時）",
+  "permissionLocationDesc": "GPS 位置を取得してデバイスに送信",
+  "permissionLocationAlways": "位置情報（常に）",
+  "permissionLocationAlwaysDesc": "画面ロック時も位置情報を取得",
+  "permissionNotification": "通知",
+  "permissionNotificationDesc": "バックグラウンドサービスの状態を表示",
+  "permissionRequest": "許可をリクエスト",
+  "permissionOpenSettings": "設定を開く",
+  "permissionAllRequired": "すべての権限が必要です"
 }

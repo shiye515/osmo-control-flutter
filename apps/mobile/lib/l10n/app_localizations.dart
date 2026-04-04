@@ -670,6 +670,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wake not supported on iOS. Please press camera power button manually.'**
   String get wakeNotSupportedOnIos;
+
+  /// Permission section header in settings
+  ///
+  /// In en, this message translates to:
+  /// **'Permissions'**
+  String get permissionSection;
+
+  /// Bluetooth permission name
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth'**
+  String get permissionBluetooth;
+
+  /// Bluetooth permission description
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to Osmo devices'**
+  String get permissionBluetoothDesc;
+
+  /// Location permission name
+  ///
+  /// In en, this message translates to:
+  /// **'Location (While Using)'**
+  String get permissionLocation;
+
+  /// Location permission description
+  ///
+  /// In en, this message translates to:
+  /// **'Get GPS position for device'**
+  String get permissionLocationDesc;
+
+  /// Always location permission name
+  ///
+  /// In en, this message translates to:
+  /// **'Location (Always)'**
+  String get permissionLocationAlways;
+
+  /// No description provided for @permissionLocationAlwaysDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue GPS in background when screen locked'**
+  String get permissionLocationAlwaysDesc;
+
+  /// Notification permission name
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get permissionNotification;
+
+  /// Notification permission description
+  ///
+  /// In en, this message translates to:
+  /// **'Show background service status'**
+  String get permissionNotificationDesc;
+
+  /// Request permission button
+  ///
+  /// In en, this message translates to:
+  /// **'Request'**
+  String get permissionRequest;
+
+  /// Open system settings button
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get permissionOpenSettings;
+
+  /// Warning text when permissions not granted
+  ///
+  /// In en, this message translates to:
+  /// **'All permissions are required for full functionality'**
+  String get permissionAllRequired;
 }
 
 class _AppLocalizationsDelegate

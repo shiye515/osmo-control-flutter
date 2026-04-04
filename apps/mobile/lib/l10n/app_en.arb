@@ -389,5 +389,53 @@
   "wakeNotSupportedOnIos": "Wake not supported on iOS. Please press camera power button manually.",
   "@wakeNotSupportedOnIos": {
     "description": "Wake not supported message for iOS"
+  },
+  "permissionSection": "Permissions",
+  "@permissionSection": {
+    "description": "Permission section header in settings"
+  },
+  "permissionBluetooth": "Bluetooth",
+  "@permissionBluetooth": {
+    "description": "Bluetooth permission name"
+  },
+  "permissionBluetoothDesc": "Connect to Osmo devices",
+  "@permissionBluetoothDesc": {
+    "description": "Bluetooth permission description"
+  },
+  "permissionLocation": "Location (While Using)",
+  "@permissionLocation": {
+    "description": "Location permission name"
+  },
+  "permissionLocationDesc": "Get GPS position for device",
+  "@permissionLocationDesc": {
+    "description": "Location permission description"
+  },
+  "permissionLocationAlways": "Location (Always)",
+  "@permissionLocationAlways": {
+    "description": "Always location permission name"
+  },
+  "permissionLocationAlwaysDesc": "Continue GPS in background when screen locked",
+  "@permissionLocationAlwaysAlwaysDesc": {
+    "description": "Always location permission description"
+  },
+  "permissionNotification": "Notifications",
+  "@permissionNotification": {
+    "description": "Notification permission name"
+  },
+  "permissionNotificationDesc": "Show background service status",
+  "@permissionNotificationDesc": {
+    "description": "Notification permission description"
+  },
+  "permissionRequest": "Request",
+  "@permissionRequest": {
+    "description": "Request permission button"
+  },
+  "permissionOpenSettings": "Open Settings",
+  "@permissionOpenSettings": {
+    "description": "Open system settings button"
+  },
+  "permissionAllRequired": "All permissions are required for full functionality",
+  "@permissionAllRequired": {
+    "description": "Warning text when permissions not granted"
   }
 }
