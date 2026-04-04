@@ -28,6 +28,7 @@ class BleService {
   Stream<List<int>>? get notifyStream => _notifyController?.stream;
 
   StreamSubscription<List<int>>? _notifySubscription;
+  StreamSubscription<List<int>>? _notifyForwardSubscription; // Forward to notify controller
   final _frameBuffer = <int>[];
 
   // Auth state
@@ -104,7 +105,11 @@ class BleService {
               await char.setNotifyValue(true);
               _notifyController = StreamController<List<int>>.broadcast();
               _notifySubscription = char.lastValueStream.listen(_onDataReceived);
-              char.lastValueStream.listen(_notifyController!.add);
+              _notifyForwardSubscription = char.lastValueStream.listen((data) {
+                if (_notifyController != null && !_notifyController!.isClosed) {
+                  _notifyController!.add(data);
+                }
+              });
             }
           }
         }
@@ -289,9 +294,11 @@ class BleService {
       _updatePowerMode(powerMode);
     }
 
-    // Emit status update
+    // Emit status update (check if controller is closed)
     _cameraStatus = newStatus;
-    _cameraStatusController.add(newStatus);
+    if (!_cameraStatusController.isClosed) {
+      _cameraStatusController.add(newStatus);
+    }
   }
 
   /// Update power mode state.
@@ -299,7 +306,9 @@ class BleService {
     if (_powerMode != newMode) {
       _log.info('Power mode: ${newMode == 3 ? "sleep" : "normal"}');
       _powerMode = newMode;
-      _powerModeController.add(newMode);
+      if (!_powerModeController.isClosed) {
+        _powerModeController.add(newMode);
+      }
     }
   }
 
@@ -321,6 +330,8 @@ class BleService {
     _connectionSubscription = null;
     await _notifySubscription?.cancel();
     _notifySubscription = null;
+    await _notifyForwardSubscription?.cancel();
+    _notifyForwardSubscription = null;
     await _connectedDevice?.disconnect();
     _connectedDevice = null;
     _writeCharacteristic = null;
@@ -336,12 +347,15 @@ class BleService {
   void _onDeviceDisconnected() {
     _notifySubscription?.cancel();
     _notifySubscription = null;
+    _notifyForwardSubscription?.cancel();
+    _notifyForwardSubscription = null;
     _writeCharacteristic = null;
     _connectedDevice = null;
     _notifyController?.close();
     _notifyController = null;
     _frameBuffer.clear();
     _cameraDeviceId = 0;
+    _powerMode = 0;
     _cameraStatus = const CameraStatusModel();
   }
 
