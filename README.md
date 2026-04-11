@@ -35,7 +35,7 @@
 | 设备类型 | 型号                         |
 | -------- | ---------------------------- |
 | iOS      | iPhone XS, iPhone 16 Pro Max |
-| Android  | Moto X Style         |
+| Android  | Moto X Style                 |
 | 相机     | DJI Osmo Action 4            |
 
 
@@ -80,9 +80,13 @@ flutter build apk
 flutter build ios
 ```
 
-## 协议参考
+## 致谢
 
-本应用使用 DJI R SDK 协议与 Osmo 设备通信，协议文档参考[Osmo-GPS-Controller-Demo](https://github.com/dji-sdk/Osmo-GPS-Controller-Demo)
+1. 本仓库的想法源自这个仓库[欧思魔控 (osmoControl)](https://github.com/AlliotTech/osmoControl)
+2. 本应用使用 DJI R SDK 协议与 Osmo 设备通信，协议文档参考[Osmo-GPS-Controller-Demo](https://github.com/dji-sdk/Osmo-GPS-Controller-Demo)
+3. 感谢阿里云提供coding-plan，感谢claude-code提供agent，感谢智谱开源GLM-5
+
+
 
 ## License
 
